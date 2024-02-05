@@ -1,0 +1,4 @@
+/target/
+.*
+playlist.bin
+logging.properties
