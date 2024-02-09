@@ -45,6 +45,16 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
     public List<MPMedia> getAll() {
         return Collections.unmodifiableList(mediaList);
     }
+
+    public void removeElement(MPMedia media) {
+        int idx = mediaList.indexOf(media);
+        if(idx > -1) {
+            mediaList.remove(idx);
+            fireIntervalRemoved(this, idx, idx);
+        }
+    }
     
-    
+    public void removeElements(List<MPMedia> media) {
+        mediaList.removeAll(media);
+    }
 }

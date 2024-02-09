@@ -1,4 +1,4 @@
-package mb.player.media;
+package mb.player.components.swing;
 
 import static java.text.MessageFormat.format;
 
@@ -13,19 +13,24 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -35,14 +40,19 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.github.sardine.DavResource;
+import com.github.sardine.SardineFactory;
 
-import mb.player.components.swing.Playlist;
-import mb.player.components.swing.PlaylistModel;
+import mb.player.media.MPMedia;
+import mb.player.media.MPUtils;
+import mb.player.media.MediaPreProcessor;
+import mb.player.media.PlaylistPersistenceService;
 import mb.player.media.audio.AudioPlayer;
 import mb.player.media.audio.AudioPlayerException;
 import mb.player.media.audio.AudioPlayerListener;
@@ -52,6 +62,7 @@ import net.miginfocom.swing.MigLayout;
 public class SwingMPlayer extends JFrame {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = Logger.getLogger(SwingMPlayer.class.getName());
+    private static final int BUTTON_ICON_SIZE = 15;
     
     private AudioPlayer player;
     private MPMedia currentlyPlayingMedia;
@@ -186,24 +197,24 @@ public class SwingMPlayer extends JFrame {
         
         /* Controls panel */
         JPanel controlsPanel = new JPanel(new MigLayout("wrap, fill", 
-                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][][][grow 1]", 
+                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][][][grow 1][grow 1][grow 1]", 
                 "[][grow]"));
         add(controlsPanel, "grow");
         
-        controlsPanel.add(new JSeparator(SwingConstants.HORIZONTAL), "grow, spanx 10");
+        controlsPanel.add(new JSeparator(SwingConstants.HORIZONTAL), "grow, spanx 12");
         
         // Prev
-        JButton prevButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_BACKWARD, 15));
+        JButton prevButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_BACKWARD, BUTTON_ICON_SIZE));
         prevButton.addActionListener(e -> playPrev());
         controlsPanel.add(prevButton, "grow");
         
         // Play
-        controlsPanel.add(playButton = new JButton(FontIcon.of(FontAwesomeSolid.PLAY, 15)), "grow");
+        controlsPanel.add(playButton = new JButton(FontIcon.of(FontAwesomeSolid.PLAY, BUTTON_ICON_SIZE)), "grow");
         playButton.addActionListener(e -> onPlayButtonClicked());
         createPlayButtonBlinkTimer();
         
         // Next
-        JButton nextButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_FORWARD, 15));
+        JButton nextButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_FORWARD, BUTTON_ICON_SIZE));
         nextButton.addActionListener(e -> playNext());
         controlsPanel.add(nextButton, "grow");
         
@@ -226,8 +237,18 @@ public class SwingMPlayer extends JFrame {
         controlsPanel.add(new JSeparator(SwingConstants.VERTICAL), "grow");
         
         // Loop
-        loopToggle = new JToggleButton(FontIcon.of(FontAwesomeSolid.REDO, 15));
+        loopToggle = new JToggleButton(FontIcon.of(FontAwesomeSolid.REDO, BUTTON_ICON_SIZE));
         controlsPanel.add(loopToggle, "grow");
+        
+        // Add local
+        JButton addLocalButton = new JButton(FontIcon.of(FontAwesomeSolid.PLUS, BUTTON_ICON_SIZE));
+        addLocalButton.addActionListener(e -> onAddLocalButtonClicked());
+        controlsPanel.add(addLocalButton, "grow");
+        
+        // Add remote
+        JButton addRemoteButton = new JButton(FontIcon.of(FontAwesomeSolid.GLOBE, BUTTON_ICON_SIZE));
+        addRemoteButton.addActionListener(e -> onAddRemoteButtonClicked());
+        controlsPanel.add(addRemoteButton, "grow");
     }
     
     private void createWindowListeners() {
@@ -266,9 +287,19 @@ public class SwingMPlayer extends JFrame {
     private void playNext() {
         List<MPMedia> tracks = ((PlaylistModel) playlist.getModel()).getAll();
         int idx = tracks.indexOf(currentlyPlayingMedia);
+        
+        // Handled cases:
+        // * Play next
+        // * Play first if previous was last in list
+        // * Play selected if current was deleted
+        // * Play first if everything else fails
         if(idx > -1 && idx < tracks.size() - 1) {
             playMedia(tracks.get(++idx));
         } else if(idx == tracks.size() - 1 && loopToggle.isSelected()){
+            playMedia(tracks.get(0));
+        } else if(playlist.getSelectedValue() != null){
+            playMedia(playlist.getSelectedValue());
+        } else if(!tracks.isEmpty()) {
             playMedia(tracks.get(0));
         }
     }
@@ -276,8 +307,17 @@ public class SwingMPlayer extends JFrame {
     private void playPrev() {
         List<MPMedia> tracks = ((PlaylistModel) playlist.getModel()).getAll();
         int idx = tracks.indexOf(currentlyPlayingMedia);
+        
+        // Handled cases:
+        // * Play previous
+        // * Play selected if current was deleted
+        // * Play first if everything else fails
         if(idx > 0) {
             playMedia(tracks.get(--idx));
+        } else if(playlist.getSelectedValue() != null){
+            playMedia(playlist.getSelectedValue());
+        } else if(!tracks.isEmpty()) {
+            playMedia(tracks.get(0));
         }
     }
     
@@ -407,6 +447,33 @@ public class SwingMPlayer extends JFrame {
         });
     }
     
+    private void onAddLocalButtonClicked() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setMultiSelectionEnabled(true);
+        chooser.setFileFilter(new FileNameExtensionFilter(
+                "Supported Audio Files", "mp3", "flac", "wav"));
+        if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            
+            File[] files = chooser.getSelectedFiles();
+            List<MPMedia> media = Arrays.stream(files)
+                .filter(f -> f.getName().endsWith("mp3") || f.getName().endsWith("flac") || f.getName().endsWith("wav"))
+                .map(f -> new MPMedia(f.getName(), f.toURI().toString(), MPMedia.Type.AUDIO))
+                .collect(Collectors.toList());
+            ((PlaylistModel) playlist.getModel()).addAll(media);
+        }
+    }
+    
+    private void onAddRemoteButtonClicked() {
+        String[] input = LoginDialog.showDialog(this);
+        if(input != null) {
+            String path = input[0], user = input[1], pass = input[2];
+            List<MPMedia> media = fetchRemoteMedia(path, user, pass);
+            if(media != null) {
+                ((PlaylistModel) playlist.getModel()).addAll(media);
+            }
+        }
+    }
+    
     /* Utils */
     
     private void startPlayButtonBlink() {
@@ -431,6 +498,33 @@ public class SwingMPlayer extends JFrame {
                 hrs < 10 ? "0" : "", hrs, 
                 min < 10 ? "0" : "", min, 
                 sec < 10 ? "0" : "", sec));
+    }
+    
+    private List<MPMedia> fetchRemoteMedia(String path, String user, String pass) {
+        List<MPMedia> media = null;
+        List<DavResource> resources = fetchRemoteResources(path, user, pass);
+        if(resources != null) {
+        
+            // Filter out mp3 and flac files and add them to the playlist
+            media = resources.stream()
+                    .filter(r -> r.getName().endsWith("mp3") || r.getName().endsWith("flac") || r.getName().endsWith("wav"))
+                    .map(r -> new MPMedia(r.getName(), path + "/" + MPUtils.encodeUrlPath(r.getName()), user, pass, MPMedia.Type.AUDIO))
+                    .collect(Collectors.toList());
+        }
+        return media;
+    }
+    
+    private List<DavResource> fetchRemoteResources(String path, String user, String pass) {
+        List<DavResource> resources = null;
+        try {
+            resources = SardineFactory.begin(user, pass).list(path);
+        } catch (IOException e) {
+            LOG.log(Level.WARNING, "Adding remote location failed", e);
+            JOptionPane.showMessageDialog(null, e.getMessage() != null ? e.getMessage() : 
+                (e.getCause() != null ? e.getCause().getMessage() : "Unknown error"), 
+                    "Remote Location Error", JOptionPane.WARNING_MESSAGE);
+        }
+        return resources;
     }
 
     /* Main */

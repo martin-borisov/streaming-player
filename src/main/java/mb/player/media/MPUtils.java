@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
@@ -144,5 +145,32 @@ public class MPUtils {
         final List<String> extensions = Arrays.asList("mp3", "flac", "wav");
         Optional<String> ext = getFileExtension(file);
         return extensions.contains(ext.map(s -> s.toLowerCase()).orElse(""));
+    }
+    
+    /**
+     * Properly encodes URI path segments
+     */
+    public static String encodeUrlPath(String pathSegment) {
+        final StringBuilder sb = new StringBuilder();
+
+        try {
+            for (int i = 0; i < pathSegment.length(); i++) {
+                final char c = pathSegment.charAt(i);
+
+                if (((c >= 'A') && (c <= 'Z')) || ((c >= 'a') && (c <= 'z')) || ((c >= '0') && (c <= '9')) || (c == '-')
+                        || (c == '.') || (c == '_') || (c == '~')) {
+                    sb.append(c);
+                } else {
+                    final byte[] bytes = String.valueOf(c).getBytes("UTF-8");
+                    for (byte b : bytes) {
+                        sb.append('%').append(Integer.toHexString((b >> 4) & 0xf)).append(Integer.toHexString(b & 0xf));
+                    }
+                }
+            }
+
+            return sb.toString();
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }
