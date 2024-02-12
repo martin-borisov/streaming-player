@@ -41,7 +41,7 @@ public class Playlist extends JList<MPMedia> {
     private void setup() {
         setModel(model = new PlaylistModel());
         setDropMode(DropMode.ON_OR_INSERT);
-        setCellRenderer(new PlaylistCellRenderer());
+        setCellRenderer(new PlaylistCellRenderer(true));
         setTransferHandler(new TransferHandler() {
             private static final long serialVersionUID = 1L;
             
