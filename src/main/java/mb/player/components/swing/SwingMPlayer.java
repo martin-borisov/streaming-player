@@ -42,6 +42,7 @@ import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -297,7 +298,7 @@ public class SwingMPlayer extends JFrame {
             playMedia(tracks.get(++idx));
         } else if(idx == tracks.size() - 1 && loopToggle.isSelected()){
             playMedia(tracks.get(0));
-        } else if(playlist.getSelectedValue() != null){
+        } else if(idx == -1 && playlist.getSelectedValue() != null){
             playMedia(playlist.getSelectedValue());
         } else if(!tracks.isEmpty()) {
             playMedia(tracks.get(0));
@@ -314,7 +315,7 @@ public class SwingMPlayer extends JFrame {
         // * Play first if everything else fails
         if(idx > 0) {
             playMedia(tracks.get(--idx));
-        } else if(playlist.getSelectedValue() != null){
+        } else if(idx == -1 && playlist.getSelectedValue() != null){
             playMedia(playlist.getSelectedValue());
         } else if(!tracks.isEmpty()) {
             playMedia(tracks.get(0));
@@ -458,6 +459,7 @@ public class SwingMPlayer extends JFrame {
             List<MPMedia> media = Arrays.stream(files)
                 .filter(f -> f.getName().endsWith("mp3") || f.getName().endsWith("flac") || f.getName().endsWith("wav"))
                 .map(f -> new MPMedia(f.getName(), f.toURI().toString(), MPMedia.Type.AUDIO))
+                .sorted((m1, m2) -> StringUtils.compare(m1.getName(), m2.getName()))
                 .collect(Collectors.toList());
             ((PlaylistModel) playlist.getModel()).addAll(media);
         }
@@ -509,6 +511,7 @@ public class SwingMPlayer extends JFrame {
             media = resources.stream()
                     .filter(r -> r.getName().endsWith("mp3") || r.getName().endsWith("flac") || r.getName().endsWith("wav"))
                     .map(r -> new MPMedia(r.getName(), path + "/" + MPUtils.encodeUrlPath(r.getName()), user, pass, MPMedia.Type.AUDIO))
+                    .sorted((m1, m2) -> StringUtils.compare(m1.getName(), m2.getName()))
                     .collect(Collectors.toList());
         }
         return media;
