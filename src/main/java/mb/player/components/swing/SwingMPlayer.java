@@ -4,9 +4,11 @@ import static java.text.MessageFormat.format;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Taskbar;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -26,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -170,7 +173,7 @@ public class SwingMPlayer extends JFrame {
             public void paint(Graphics g) {
                 if(currArtwork != null) {
                     
-                    int sizeFactor = currArtwork.getHeight() / currArtwork.getWidth();
+                    int sizeFactor = Math.round((float) currArtwork.getHeight() / (float) currArtwork.getWidth());
                     if(getHeight() > getWidth()) {
                         int scaledHeight = getWidth() * sizeFactor;
                         g.drawImage(currArtwork, 0, getHeight() / 2 - scaledHeight / 2, getWidth(), scaledHeight, null);
@@ -253,7 +256,7 @@ public class SwingMPlayer extends JFrame {
     }
     
     private void createWindowListeners() {
-        this.addWindowListener(new WindowAdapter() {
+        addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 close();
                 System.exit(0);
@@ -533,11 +536,31 @@ public class SwingMPlayer extends JFrame {
     /* Main */
     
     public static void main(String[] args) {
-        FlatLightLaf.setup();
         
+        // Set application taskbar/dock icon
+        if(Taskbar.isTaskbarSupported()) {
+            try {
+                BufferedImage image = ImageIO.read(SwingMPlayer.class.getResource(
+                        "/streaming-player-icon.png"));
+                Taskbar.getTaskbar().setIconImage(image);
+            } catch (IOException e) {
+                LOG.log(Level.INFO, "Loading application icon failed", e);
+            }
+        }
+        
+        // Customize application about menu
+        if(Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().setAboutHandler(e -> {
+                JOptionPane.showMessageDialog(null, "Streaming Player v0.1", 
+                        "About Streaming Player", JOptionPane.INFORMATION_MESSAGE, null);
+            });
+        }
+        
+        FlatLightLaf.setup();
         SwingMPlayer player = new SwingMPlayer();
         player.setSize(800, 600);
         player.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        player.setLocationByPlatform(true);
         player.setVisible(true);
     }
 }

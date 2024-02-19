@@ -11,6 +11,8 @@ import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DragSourceDropEvent;
 import java.awt.dnd.DragSourceEvent;
 import java.awt.dnd.DragSourceListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -25,6 +27,7 @@ import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.TransferHandler;
+import javax.swing.border.EmptyBorder;
 
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
@@ -65,6 +68,7 @@ public class Playlist extends JList<MPMedia> {
     }
     
     private void setup() {
+        setBorder(new EmptyBorder(0, 4, 0, 4));
         setModel(model = new PlaylistModel());
         setDropMode(DropMode.INSERT);
         setDragEnabled(true);
@@ -182,9 +186,19 @@ public class Playlist extends JList<MPMedia> {
                 }
             }
         });
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                switch (e.getKeyCode()) {
+                case KeyEvent.VK_DELETE:
+                case KeyEvent.VK_BACK_SPACE:
+                    removeSelectedElements();
+                    break;
+                }
+            }
+        });
     }
     
-    private void removeSelectedElements() {
+    public void removeSelectedElements() {
         model.removeElements(getSelectedIndices());
     }
     
