@@ -265,7 +265,7 @@ public class SwingMPlayer extends JFrame {
     }
     
     private void createPlayButtonBlinkTimer() {
-        playButtonBlinkTimer = new Timer(100, (event) -> {
+        playButtonBlinkTimer = new Timer(100, e -> {
             FontIcon icon = (FontIcon) playButton.getIcon();
             Color col = icon.getIconColor();
             col = new Color(col.getRed(), col.getGreen(), col.getBlue(),
@@ -303,8 +303,10 @@ public class SwingMPlayer extends JFrame {
             playMedia(tracks.get(0));
         } else if(idx == -1 && playlist.getSelectedValue() != null){
             playMedia(playlist.getSelectedValue());
-        } else if(!tracks.isEmpty()) {
+        } else if(!tracks.isEmpty() && loopToggle.isSelected()) {
             playMedia(tracks.get(0));
+        } else {
+            onPlaybackStopped();
         }
     }
     
@@ -344,7 +346,7 @@ public class SwingMPlayer extends JFrame {
                         .orElse(currMediaAttribs.get("artist"))).append("' ");
         }
         if(currMediaAttribs.containsKey("album")) {
-            artistAlbumBuf.append("from album '").append(currMediaAttribs.get("album")).append("'");
+            artistAlbumBuf.append("from '").append(currMediaAttribs.get("album")).append("'");
         }
         artistAlbumLabel.setText(artistAlbumBuf.toString());
         
@@ -487,8 +489,9 @@ public class SwingMPlayer extends JFrame {
     }
     
     private void stopPlayButtonBlink() {
-        ((FontIcon) playButton.getIcon()).setIconColor(Color.BLACK);
         playButtonBlinkTimer.stop();
+        ((FontIcon) playButton.getIcon()).setIconColor(Color.BLACK);
+        playButton.repaint();
     }
     
     private boolean playlistNotEmpty() {
