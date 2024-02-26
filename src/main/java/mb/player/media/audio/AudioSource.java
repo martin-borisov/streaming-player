@@ -73,4 +73,8 @@ public class AudioSource {
         return url != null;
     }
 
+    @Override
+    public String toString() {
+        return "AudioSource [url=" + url + ", file=" + file + "]";
+    }
 }

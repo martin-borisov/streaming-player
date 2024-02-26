@@ -159,6 +159,7 @@
         </dependency>
         
         <!-- MP3 support -->
+        <!--
         <dependency>
             <groupId>com.googlecode.soundlibs</groupId>
             <artifactId>mp3spi</artifactId>
@@ -181,6 +182,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        -->
         
         <!-- Swing Extras -->
         <dependency>
@@ -204,6 +206,13 @@
             <groupId>com.github.lookfirst</groupId>
             <artifactId>sardine</artifactId>
             <version>5.10</version>
+        </dependency>
+        
+        <!-- Trying out stuff -->
+        <dependency>
+            <groupId>com.tagtraum</groupId>
+            <artifactId>ffsampledsp-complete</artifactId>
+            <version>0.9.53</version>
         </dependency>
     </dependencies>
 </project>
