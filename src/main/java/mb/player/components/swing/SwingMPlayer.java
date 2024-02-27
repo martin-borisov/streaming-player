@@ -540,23 +540,34 @@ public class SwingMPlayer extends JFrame {
     
     public static void main(String[] args) {
         
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(SwingMPlayer.class.getResource(
+                    "/streaming-player-icon.png"));
+        } catch (IOException e) {
+            LOG.log(Level.WARNING, "Loading app icon failed", e);
+        }
+        
+        
         // Set application taskbar/dock icon
-        if(Taskbar.isTaskbarSupported()) {
+        if(Taskbar.isTaskbarSupported() && image != null) {
             try {
-                BufferedImage image = ImageIO.read(SwingMPlayer.class.getResource(
-                        "/streaming-player-icon.png"));
                 Taskbar.getTaskbar().setIconImage(image);
-            } catch (IOException e) {
-                LOG.log(Level.INFO, "Loading application icon failed", e);
+            } catch (UnsupportedOperationException e) {
+                LOG.log(Level.FINE, e.getMessage());
             }
         }
         
         // Customize application about menu
         if(Desktop.isDesktopSupported()) {
-            Desktop.getDesktop().setAboutHandler(e -> {
-                JOptionPane.showMessageDialog(null, "Streaming Player v0.1", 
-                        "About Streaming Player", JOptionPane.INFORMATION_MESSAGE, null);
-            });
+            try {
+                Desktop.getDesktop().setAboutHandler(e -> {
+                    JOptionPane.showMessageDialog(null, "Streaming Player v0.1", 
+                            "About Streaming Player", JOptionPane.INFORMATION_MESSAGE, null);
+                });
+            } catch (UnsupportedOperationException e) {
+                LOG.log(Level.FINE, e.getMessage());
+            }
         }
         
         FlatLightLaf.setup();
@@ -564,6 +575,11 @@ public class SwingMPlayer extends JFrame {
         player.setSize(800, 600);
         player.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         player.setLocationByPlatform(true);
+        
+        if(image != null) {
+            player.setIconImage(image);
+        }
+        
         player.setVisible(true);
     }
 }
