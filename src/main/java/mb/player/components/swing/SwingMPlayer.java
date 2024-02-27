@@ -575,6 +575,7 @@ public class SwingMPlayer extends JFrame {
         player.setSize(800, 600);
         player.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         player.setLocationByPlatform(true);
+        player.setTitle("Streaming Player");
         
         if(image != null) {
             player.setIconImage(image);
