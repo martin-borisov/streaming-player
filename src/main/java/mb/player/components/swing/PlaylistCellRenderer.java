@@ -39,14 +39,21 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
             boolean isSelected, boolean cellHasFocus) {
         nameLabel.setIcon(media == currentlyPlayingMedia ? FontIcon.of(FontAwesomeSolid.PLAY, 15) : null);
         nameLabel.setText(media.getName());
+        String source = URLDecoder.decode(StringUtils.removeStart(media.getSource(), "file:"), 
+                StandardCharsets.UTF_8);
         
-        if(showSource && StringUtils.isNotBlank(media.getSource())) {
-            String source = URLDecoder.decode(media.getSource(), StandardCharsets.UTF_8);
-            source = StringUtils.removeStart(source, "file:");
+        if(showSource) {
             sourceLabel.setText(source);
         } else {
             sourceLabel.setText(StringUtils.EMPTY);
         }
+        
+        StringBuilder tooltipBuf = new StringBuilder();
+        tooltipBuf.append(media.getName()).append("\n").append(source);
+        if(media.getType() != null) {
+            tooltipBuf.append("\n").append("Type: ").append(media.getType());
+        }
+        setToolTipText(tooltipBuf.toString());
         
         if (isSelected) {
             setBackground(list.getSelectionBackground());
