@@ -235,6 +235,7 @@ public class SwingMPlayer extends JFrame {
         // Volume
         controlsPanel.add(new JLabel("Vol:"));
         volumeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+        volumeSlider.addChangeListener(e -> onVolumeSliderMoved());
         controlsPanel.add(volumeSlider, "grow");
         
         // Separator
@@ -478,6 +479,13 @@ public class SwingMPlayer extends JFrame {
             if(media != null) {
                 ((PlaylistModel) playlist.getModel()).addAll(media);
             }
+        }
+    }
+    
+    private void onVolumeSliderMoved() {
+        if(!volumeSlider.getValueIsAdjusting()) {
+            int val = volumeSlider.getValue();
+            player.setVolume(val / 100);
         }
     }
     

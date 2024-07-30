@@ -63,16 +63,10 @@ public class AudioPlayerTest {
         assertTrue(listener.stopCallCount > 0);
     }
     
-    private static File loadDefaultAudioFile() throws URISyntaxException {
-        URL resource = AudioPlayerTest.class.getResource("/click-track.mp3");
-        assertNotNull("Test file not found", resource);
-        return new File(resource.toURI());
-    }
-    
     private static AudioPlayer createAndOpenAudioPlayer(AudioPlayerListener listener) throws Exception {
         AudioPlayer player = new AudioPlayer();
         player.addListener(listener);
-        player.open(loadDefaultAudioFile());
+        player.open(TestUtils.loadDefaultAudioFile());
         return player;
     }
     
@@ -97,7 +91,5 @@ public class AudioPlayerTest {
         public void onStop() {
             stopCallCount++;
         }
-        
-        
     }
 }
