@@ -7,9 +7,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>18</maven.compiler.source>
-        <maven.compiler.target>18</maven.compiler.target>
-        <javafx.version>18</javafx.version>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -70,19 +69,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
-                <configuration>
-                    <mainClass>mb.player.media.MPlayer</mainClass>
-                    <options>
-                        <option>-Djava.util.logging.config.file=${basedir}/logging.properties</option>
-                        <option>-DTraceAudioFileReader=true</option>
-                        <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8888,quiet=y</option>
-                    </options>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     
@@ -98,44 +84,14 @@
         
         <!-- Runtime -->
         <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-media</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
-            <artifactId>ikonli-javafx</artifactId>
-            <version>12.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-fontawesome5-pack</artifactId>
             <version>12.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <version>11.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.miglayout</groupId>
-            <artifactId>miglayout-javafx</artifactId>
-            <version>11.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -159,7 +115,6 @@
         </dependency>
         
         <!-- MP3 support -->
-        <!--
         <dependency>
             <groupId>com.googlecode.soundlibs</groupId>
             <artifactId>mp3spi</artifactId>
@@ -182,7 +137,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        -->
         
         <!-- Swing Extras -->
         <dependency>

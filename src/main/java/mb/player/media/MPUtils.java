@@ -27,8 +27,6 @@ import javax.imageio.ImageIO;
 import com.mpatric.mp3agic.AbstractID3v2Tag;
 import com.mpatric.mp3agic.ID3v2TagFactory;
 
-import javafx.scene.image.Image;
-
 public class MPUtils {
     
     private static final Logger LOG = Logger.getLogger(MPUtils.class.getName());
@@ -57,16 +55,6 @@ public class MPUtils {
             BufferedImage image = null;
             if(is != null) {
                 image = ImageIO.read(is);
-            }
-            return image;
-        }
-    }
-    
-    public static Image imageFromID3TagJavaFX(ByteArrayInputStream bytes) throws IOException {
-        try(InputStream is = imageInputStreamFromID3Tag(bytes)) {
-            Image image = null;
-            if(is != null) {
-                image = new Image(is, 100, 100, true, true);
             }
             return image;
         }
@@ -105,16 +93,6 @@ public class MPUtils {
             }
         }
         return is;
-    }
-    
-    public static Image fetchMediaCoverArtJavaFX(MPMedia media) throws IOException {
-        try(InputStream is = fetchMediaCoverArtInputStream(media)) {
-            Image image = null;
-            if(is != null) {
-                image = new Image(is, 100, 100, true, true);
-            }
-            return image;
-        }
     }
     
     public static BufferedImage fetchMediaCoverArtSwing(MPMedia media) throws IOException {
