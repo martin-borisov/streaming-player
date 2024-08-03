@@ -18,7 +18,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Authenticator;
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -507,13 +506,7 @@ public class SwingMPlayer extends JFrame {
     }
     
     private void updatePlayTimeLabel(int seconds) {
-        int hrs = (seconds / 60) / 60;
-        int min = (seconds / 60) % 60;
-        int sec = seconds % 60;
-        playTimeLabel.setText(MessageFormat.format("{0}{1}:{2}{3}:{4}{5}", 
-                hrs < 10 ? "0" : "", hrs, 
-                min < 10 ? "0" : "", min, 
-                sec < 10 ? "0" : "", sec));
+        playTimeLabel.setText(MPUtils.secToTimeFormat(seconds));
     }
     
     private List<MPMedia> fetchRemoteMedia(String path, String user, String pass) {

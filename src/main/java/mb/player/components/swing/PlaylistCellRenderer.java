@@ -16,22 +16,24 @@ import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
 import mb.player.media.MPMedia;
+import mb.player.media.MPUtils;
 import net.miginfocom.swing.MigLayout;
 
 public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPMedia> {
     private static final long serialVersionUID = 1L;
+    private static final Color DETAILS_COLOR = new Color(Integer.parseInt("778899", 16));
     
-    private JLabel nameLabel, sourceLabel;
+    private JLabel nameLabel, sourceLabel, attribsLabel;
     private MPMedia currentlyPlayingMedia;
-    private boolean showSource;
+    private boolean showDetails;
     
     public PlaylistCellRenderer() {
         createAndLayoutComponents();
     }
     
-    public PlaylistCellRenderer(boolean showSource) {
+    public PlaylistCellRenderer(boolean showDetails) {
         this();
-        this.showSource = showSource;
+        this.showDetails = showDetails;
     }
 
     @Override
@@ -42,10 +44,17 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
         String source = URLDecoder.decode(StringUtils.removeStart(media.getSource(), "file:"), 
                 StandardCharsets.UTF_8);
         
-        if(showSource) {
+        if(showDetails) {
             sourceLabel.setText(source);
+            sourceLabel.setVisible(true);
+            attribsLabel.setText(media.getDurationSec() > 0 ? 
+                    MPUtils.secToTimeFormat(media.getDurationSec()) : "N/A");
+            attribsLabel.setVisible(true);
         } else {
             sourceLabel.setText(StringUtils.EMPTY);
+            sourceLabel.setVisible(false);
+            attribsLabel.setText(StringUtils.EMPTY);
+            attribsLabel.setVisible(false);
         }
         
         StringBuilder tooltipBuf = new StringBuilder();
@@ -53,6 +62,8 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
         if(media.getType() != null) {
             tooltipBuf.append("\n").append("Type: ").append(media.getType());
         }
+        tooltipBuf.append("\n").append("Length: ").append(media.getDurationSec() > 0 ? 
+                    MPUtils.secToTimeFormat(media.getDurationSec()) : "N/A");
         setToolTipText(tooltipBuf.toString());
         
         if (isSelected) {
@@ -69,12 +80,12 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
         this.currentlyPlayingMedia = currentlyPlayingMedia;
     }
 
-    public boolean isShowSource() {
-        return showSource;
+    public boolean isShowDetails() {
+        return showDetails;
     }
 
-    public void setShowSource(boolean showSource) {
-        this.showSource = showSource;
+    public void setShowDetails(boolean showDetails) {
+        this.showDetails = showDetails;
     }
     
     private void createAndLayoutComponents() {
@@ -85,7 +96,11 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
         add(nameLabel, "width 0::");
         sourceLabel = new JLabel();
         sourceLabel.setFont(sourceLabel.getFont().deriveFont(sourceLabel.getFont().getStyle() | Font.ITALIC));
-        sourceLabel.setForeground(new Color(Integer.parseInt("778899", 16)));
+        sourceLabel.setForeground(DETAILS_COLOR);
         add(sourceLabel, "width 0::");
+        attribsLabel = new JLabel();
+        attribsLabel.setFont(sourceLabel.getFont().deriveFont(sourceLabel.getFont().getStyle() | Font.ITALIC));
+        attribsLabel.setForeground(DETAILS_COLOR);
+        add(attribsLabel, "width 0::");
     }
 }

@@ -15,6 +15,7 @@ public class MPMedia implements Serializable {
     
     private String name, source, user, password;
     private Type type;
+    private long durationSec;
     
     public MPMedia(String name, String source, Type type) {
         this.name = name;
@@ -70,6 +71,14 @@ public class MPMedia implements Serializable {
 
     public boolean isLocal() {
         return source != null && source.startsWith("file");
+    }
+
+    public long getDurationSec() {
+        return durationSec;
+    }
+
+    public void setDurationSec(long durationSec) {
+        this.durationSec = durationSec;
     }
 
     @Override

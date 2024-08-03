@@ -26,6 +26,7 @@ import javax.imageio.ImageIO;
 
 import com.mpatric.mp3agic.AbstractID3v2Tag;
 import com.mpatric.mp3agic.ID3v2TagFactory;
+import java.text.MessageFormat;
 
 public class MPUtils {
     
@@ -150,5 +151,15 @@ public class MPUtils {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
+    }
+    
+    public static String secToTimeFormat(long seconds) {
+        long hrs = (seconds / 60) / 60;
+        long min = (seconds / 60) % 60;
+        long sec = seconds % 60;
+        return MessageFormat.format("{0}{1}:{2}{3}:{4}{5}", 
+                hrs < 10 ? "0" : "", hrs, 
+                min < 10 ? "0" : "", min, 
+                sec < 10 ? "0" : "", sec);
     }
 }

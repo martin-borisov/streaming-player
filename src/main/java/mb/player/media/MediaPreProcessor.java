@@ -23,7 +23,7 @@ public class MediaPreProcessor {
     private Map<String, Object> attributes;
 
     public MediaPreProcessor(MPMedia media) {
-        attributes = new HashMap<String, Object>();
+        attributes = new HashMap<>();
         this.media = media;
         process();
     }
