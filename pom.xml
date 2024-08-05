@@ -1,9 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>mb.player</groupId>
     <artifactId>streaming-player</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Streaming Player</name>
+    <name>StreamingPlayer</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,7 +19,7 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
- 
+
     <build>
         <plugins>
             <plugin>
@@ -50,72 +52,68 @@
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
-                <version>2.5.1</version>
-                <executions>
-                    <execution>
-                        <id>l4j-gui</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>gui</headerType>
-                            <outfile>target/${project.name}.exe</outfile>
-                            <jar>target/${project.artifactId}-${project.version}.jar</jar>
-                            <errTitle>Streaming Player Error</errTitle>
-                            <classPath>
-                                <mainClass>mb.player.components.swing.SwingMPlayer</mainClass>
-                            </classPath>
-                            <jre>
-                                <minVersion>18</minVersion>
-                            </jre>
-                            
-                            <!--
-                            <icon>${project.basedir}/src/main/resources/streaming-player-icon.png</icon>
-                            -->
-                            
-                            <!--
-                            <versionInfo>
-                                <fileVersion>0.0.1</fileVersion>
-                                <txtFileVersion>txt file version?</txtFileVersion>
-                                <fileDescription>a description</fileDescription>
-                                <copyright>my copyright</copyright>
-                                <productVersion>4.3.2.1</productVersion>
-                                <txtProductVersion>txt product version</txtProductVersion>
-                                <productName>E-N-C-C</productName>
-                                <internalName>ccne</internalName>
-                                <originalFilename>original.exe</originalFilename>
-                            </versionInfo>
-                            -->
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>zip-assembly.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
-    
+
+    <profiles>
+        
+        <!-- Builds a native windows executable -->
+        <profile>
+            <id>nativeWindows</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                        <artifactId>launch4j-maven-plugin</artifactId>
+                        <version>2.5.1</version>
+                        <executions>
+                            <execution>
+                                <id>l4j-gui</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>launch4j</goal>
+                                </goals>
+                                <configuration>
+                                    <headerType>gui</headerType>
+                                    <outfile>target/${project.name}.exe</outfile>
+                                    <jar>${project.artifactId}-${project.version}.jar</jar>
+                                    <dontWrapJar>true</dontWrapJar>
+                                    <errTitle>StreamingPlayer</errTitle>
+                                    <classPath>
+                                        <mainClass>mb.player.components.swing.SwingMPlayer</mainClass>
+                                    </classPath>
+                                    <jre>
+                                        <minVersion>18</minVersion>
+                                    </jre>
+                                    <icon>${project.basedir}/native-resources/streaming-player-icon.ico</icon>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>zip-assembly.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
 
         <!-- Test -->
