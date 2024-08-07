@@ -9,8 +9,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>18</maven.compiler.source>
-        <maven.compiler.target>18</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -52,12 +52,76 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>zip-assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
     <profiles>
         
-        <!-- Builds a native windows executable -->
+        <profile>
+            <id>nativeUnix</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.skife.maven</groupId>
+                        <artifactId>really-executable-jar-maven-plugin</artifactId>
+                        <version>2.1.1</version>
+                        <configuration>
+                            <inputFile>target/${project.artifactId}-${project.version}.jar</inputFile>
+                            <allowOtherTypes>true</allowOtherTypes>
+                            <programFile>streaming-player</programFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>really-executable-jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>zip-assembly-unix.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <!-- Builds native windows executable -->
         <profile>
             <id>nativeWindows</id>
             <build>
@@ -103,7 +167,7 @@
                                 <configuration>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
-                                        <descriptor>zip-assembly.xml</descriptor>
+                                        <descriptor>zip-assembly-windows.xml</descriptor>
                                     </descriptors>
                                 </configuration>
                             </execution>
