@@ -77,6 +77,7 @@ public class MediaPreProcessor {
                     
                     if(mp3file.hasId3v2Tag()) {
                         ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+                        attributes.put("title", id3v2Tag.getTitle());
                         attributes.put("artist", id3v2Tag.getArtist());
                         attributes.put("album", id3v2Tag.getAlbum());
                         

@@ -162,4 +162,11 @@ public class MPUtils {
                 min < 10 ? "0" : "", min, 
                 sec < 10 ? "0" : "", sec);
     }
+    
+    public static String secToTimeFormatNoHours(long seconds) {
+        long min = (long) Math.floor(seconds / 60);
+        long sec = seconds % 60;
+        return MessageFormat.format("{0}:{1}{2}", 
+                min, sec < 10 ? "0" : "", sec);
+    }       
 }

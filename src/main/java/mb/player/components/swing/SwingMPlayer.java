@@ -1,5 +1,6 @@
 package mb.player.components.swing;
 
+import com.beust.jcommander.JCommander;
 import static java.text.MessageFormat.format;
 
 import java.awt.Canvas;
@@ -60,6 +61,8 @@ import mb.player.media.audio.AudioPlayer;
 import mb.player.media.audio.AudioPlayerException;
 import mb.player.media.audio.AudioPlayerListener;
 import mb.player.media.audio.AudioSource;
+import mb.player.media.audio.AudioSystemWrapper;
+import mb.player.media.audio.DummySourceDataLine;
 import net.miginfocom.swing.MigLayout;
 
 public class SwingMPlayer extends JFrame {
@@ -540,6 +543,17 @@ public class SwingMPlayer extends JFrame {
     /* Main */
     
     public static void main(String[] args) {
+        
+        // Parse command
+        Args arg = new Args();
+        JCommander.newBuilder().addObject(arg).build().parse(args);
+        
+        if(arg.isMockAudio()) {
+            
+            // Mock out the underlying audio system for debug purposes
+            AudioSystemWrapper.setDefaultSourceDataLine(new DummySourceDataLine());
+            LOG.log(Level.INFO, "Mock audio system enabled");
+        }
         
         BufferedImage image = null;
         try {

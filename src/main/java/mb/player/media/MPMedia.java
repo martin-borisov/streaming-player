@@ -16,6 +16,7 @@ public class MPMedia implements Serializable {
     private String name, source, user, password;
     private Type type;
     private long durationSec;
+    private String title, album, artist;
     
     public MPMedia(String name, String source, Type type) {
         this.name = name;
@@ -79,6 +80,30 @@ public class MPMedia implements Serializable {
 
     public void setDurationSec(long durationSec) {
         this.durationSec = durationSec;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
 
     @Override

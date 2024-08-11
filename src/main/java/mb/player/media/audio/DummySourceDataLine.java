@@ -1,4 +1,4 @@
-package mb.player.test;
+package mb.player.media.audio;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -152,7 +152,7 @@ public class DummySourceDataLine implements SourceDataLine {
 
     @Override
     public int write(byte[] b, int off, int len) {
-        LOG.info(MessageFormat.format("{0} bytes written", len));
+        LOG.fine(MessageFormat.format("{0} bytes written", len));
         return len;
     }
     

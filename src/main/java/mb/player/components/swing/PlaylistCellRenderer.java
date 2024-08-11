@@ -40,15 +40,26 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
     public Component getListCellRendererComponent(JList<? extends MPMedia> list, MPMedia media, int index,
             boolean isSelected, boolean cellHasFocus) {
         nameLabel.setIcon(media == currentlyPlayingMedia ? FontIcon.of(FontAwesomeSolid.PLAY, 15) : null);
-        nameLabel.setText(media.getName());
+        
+        // Title
+        StringBuilder title = new StringBuilder(
+                media.getTitle() != null ? media.getTitle() : media.getName());
+        if(media.getDurationSec() > 0) {
+            title.append(" (").append(MPUtils.secToTimeFormatNoHours(media.getDurationSec())).append(")");
+        }
+
+        nameLabel.setText(title.toString());
         String source = URLDecoder.decode(StringUtils.removeStart(media.getSource(), "file:"), 
                 StandardCharsets.UTF_8);
         
         if(showDetails) {
             sourceLabel.setText(source);
             sourceLabel.setVisible(true);
-            attribsLabel.setText(media.getDurationSec() > 0 ? 
-                    MPUtils.secToTimeFormat(media.getDurationSec()) : "N/A");
+            
+            StringBuilder attribsBuf = new StringBuilder();
+            attribsBuf.append(media.getArtist() != null ? media.getArtist() : " ");
+            attribsBuf.append(media.getAlbum() != null ? " / " + media.getAlbum() : " ");
+            attribsLabel.setText(attribsBuf.toString());
             attribsLabel.setVisible(true);
         } else {
             sourceLabel.setText(StringUtils.EMPTY);

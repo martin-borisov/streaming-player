@@ -88,6 +88,9 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
                 media.stream().forEach(m -> {
                     MediaPreProcessor mpp = new MediaPreProcessor(m);
                     m.setDurationSec(mpp.getDurationSec());
+                    m.setTitle((String) mpp.getAttributes().get("title"));
+                    m.setArtist((String) mpp.getAttributes().get("artist"));
+                    m.setAlbum((String) mpp.getAttributes().get("album"));
                     
                     // TODO Set additional attributes
                     
