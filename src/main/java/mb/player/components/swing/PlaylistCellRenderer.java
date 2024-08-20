@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
+import mb.player.components.swing.properties.PropertyService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -21,7 +22,8 @@ import net.miginfocom.swing.MigLayout;
 
 public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPMedia> {
     private static final long serialVersionUID = 1L;
-    private static final Color DETAILS_COLOR = new Color(Integer.parseInt("778899", 16));
+    private static final Color DETAILS_FONT_COLOR = new Color(Integer.parseInt("778899", 16));
+    private static final float DETAILS_FONT_SIZE_FACTOR = 0.9f;
     
     private JLabel nameLabel, sourceLabel, attribsLabel;
     private MPMedia currentlyPlayingMedia;
@@ -52,13 +54,14 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
         String source = URLDecoder.decode(StringUtils.removeStart(media.getSource(), "file:"), 
                 StandardCharsets.UTF_8);
         
-        if(showDetails) {
+        if((boolean) PropertyService.getInstance().getOrCreateProperty(
+                PropertyNamesConst.SHOW_MEDIA_ATTRIBUTES_PROPERTY_NAME, true).getValue()) {
             sourceLabel.setText(source);
             sourceLabel.setVisible(true);
             
             StringBuilder attribsBuf = new StringBuilder();
-            attribsBuf.append(media.getArtist() != null ? media.getArtist() : " ");
-            attribsBuf.append(media.getAlbum() != null ? " / " + media.getAlbum() : " ");
+            attribsBuf.append(media.getArtist() != null ? media.getArtist() : "<unknown>").append(" | ")
+                    .append(media.getAlbum() != null ? media.getAlbum() : "<unknown>");
             attribsLabel.setText(attribsBuf.toString());
             attribsLabel.setVisible(true);
         } else {
@@ -106,12 +109,13 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
         nameLabel.setFont(nameLabel.getFont().deriveFont(nameLabel.getFont().getStyle() | Font.BOLD));
         add(nameLabel, "width 0::");
         sourceLabel = new JLabel();
-        sourceLabel.setFont(sourceLabel.getFont().deriveFont(sourceLabel.getFont().getStyle() | Font.ITALIC));
-        sourceLabel.setForeground(DETAILS_COLOR);
+        sourceLabel.setFont(sourceLabel.getFont().deriveFont(sourceLabel.getFont().getStyle() | Font.ITALIC, 
+                sourceLabel.getFont().getSize() * DETAILS_FONT_SIZE_FACTOR));
+        sourceLabel.setForeground(DETAILS_FONT_COLOR);
         add(sourceLabel, "width 0::");
         attribsLabel = new JLabel();
-        attribsLabel.setFont(sourceLabel.getFont().deriveFont(sourceLabel.getFont().getStyle() | Font.ITALIC));
-        attribsLabel.setForeground(DETAILS_COLOR);
+        attribsLabel.setFont(sourceLabel.getFont());
+        attribsLabel.setForeground(DETAILS_FONT_COLOR);
         add(attribsLabel, "width 0::");
     }
 }

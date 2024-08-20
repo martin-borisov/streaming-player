@@ -21,7 +21,7 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
     private List<MPMedia> mediaList;
     
     public PlaylistModel() {
-        mediaList = new ArrayList<MPMedia>();
+        mediaList = new ArrayList<>();
     }
 
     @Override
@@ -78,6 +78,10 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
             });
         Collections.reverse(removed);
         return removed;
+    }
+    
+    public void refresh() {
+        fireContentsChanged(this, 0, mediaList.size());
     }
     
     private void enrichMedia(Collection<? extends MPMedia> media, int idx0, int idx1) { 

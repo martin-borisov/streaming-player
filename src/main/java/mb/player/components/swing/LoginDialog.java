@@ -65,6 +65,7 @@ public class LoginDialog extends JDialog {
     
     public static String[] showDialog(Frame frame) {
         LoginDialog dialog = new LoginDialog(frame);
+        dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
         dialog.dispose();
         return dialog.getInput();
