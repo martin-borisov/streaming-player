@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -24,8 +26,11 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
     private static final long serialVersionUID = 1L;
     private static final Color DETAILS_FONT_COLOR = new Color(Integer.parseInt("778899", 16));
     private static final float DETAILS_FONT_SIZE_FACTOR = 0.9f;
+    private static final int ICON_SIZE = 40;
+    private static final Icon DEFAULT_ICON = 
+            FontIcon.of(FontAwesomeSolid.QUESTION, ICON_SIZE);
     
-    private JLabel nameLabel, sourceLabel, attribsLabel;
+    private JLabel imageLabel, nameLabel, sourceLabel, attribsLabel;
     private MPMedia currentlyPlayingMedia;
     private boolean showDetails;
     
@@ -64,10 +69,16 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
                     .append(media.getAlbum() != null ? media.getAlbum() : "<unknown>");
             attribsLabel.setText(attribsBuf.toString());
             attribsLabel.setVisible(true);
+            
+            Icon icon = DEFAULT_ICON; 
+            if(media.getArtworkThumb() != null) {
+                icon = new ImageIcon(media.getArtworkThumb());
+            }
+            imageLabel.setIcon(icon);
+            imageLabel.setVisible(true);
         } else {
-            sourceLabel.setText(StringUtils.EMPTY);
+            imageLabel.setVisible(false);
             sourceLabel.setVisible(false);
-            attribsLabel.setText(StringUtils.EMPTY);
             attribsLabel.setVisible(false);
         }
         
@@ -103,19 +114,24 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
     }
     
     private void createAndLayoutComponents() {
-        setLayout(new MigLayout("insets 0, gap 0, fill, wrap", "[]", "[][]"));
+        setLayout(new MigLayout("insets 0, gap 0, hidemode 2", "[]5[]", "[][][]"));
+        
+        imageLabel = new JLabel();
+        add(imageLabel, "spany 3");
         
         nameLabel = new JLabel();
         nameLabel.setFont(nameLabel.getFont().deriveFont(nameLabel.getFont().getStyle() | Font.BOLD));
-        add(nameLabel, "width 0::");
+        add(nameLabel, "width 0::, wrap");
+        
         sourceLabel = new JLabel();
         sourceLabel.setFont(sourceLabel.getFont().deriveFont(sourceLabel.getFont().getStyle() | Font.ITALIC, 
                 sourceLabel.getFont().getSize() * DETAILS_FONT_SIZE_FACTOR));
         sourceLabel.setForeground(DETAILS_FONT_COLOR);
-        add(sourceLabel, "width 0::");
+        add(sourceLabel, "width 0::, wrap");
+        
         attribsLabel = new JLabel();
         attribsLabel.setFont(sourceLabel.getFont());
         attribsLabel.setForeground(DETAILS_FONT_COLOR);
-        add(attribsLabel, "width 0::");
+        add(attribsLabel, "width 0::, wrap");
     }
 }
