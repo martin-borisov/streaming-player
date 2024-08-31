@@ -1,5 +1,6 @@
 package mb.player.test;
 
+import mb.player.media.audio.DummySourceDataLine;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

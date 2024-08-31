@@ -1,5 +1,6 @@
 package mb.player.components.swing;
 
+import com.beust.jcommander.JCommander;
 import static java.text.MessageFormat.format;
 
 import java.awt.Canvas;
@@ -51,6 +52,7 @@ import org.kordamp.ikonli.swing.FontIcon;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.github.sardine.DavResource;
 import com.github.sardine.SardineFactory;
+import mb.player.components.swing.properties.PropertyService;
 
 import mb.player.media.MPMedia;
 import mb.player.media.MPUtils;
@@ -60,7 +62,10 @@ import mb.player.media.audio.AudioPlayer;
 import mb.player.media.audio.AudioPlayerException;
 import mb.player.media.audio.AudioPlayerListener;
 import mb.player.media.audio.AudioSource;
+import mb.player.media.audio.AudioSystemWrapper;
+import mb.player.media.audio.DummySourceDataLine;
 import net.miginfocom.swing.MigLayout;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 public class SwingMPlayer extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -86,6 +91,7 @@ public class SwingMPlayer extends JFrame {
         createAndLayoutComponents();
         createPlayer();
         createWindowListeners();
+        createConfigListeners();
         loadStoredPlaylist();
     }
     
@@ -200,11 +206,11 @@ public class SwingMPlayer extends JFrame {
         
         /* Controls panel */
         JPanel controlsPanel = new JPanel(new MigLayout("wrap, fill", 
-                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][][][grow 1][grow 1][grow 1]", 
+                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][][][grow 1][grow 1][grow 1][grow 1]", 
                 "[][grow]"));
         add(controlsPanel, "grow");
         
-        controlsPanel.add(new JSeparator(SwingConstants.HORIZONTAL), "grow, spanx 12");
+        controlsPanel.add(new JSeparator(SwingConstants.HORIZONTAL), "grow, spanx 13");
         
         // Prev
         JButton prevButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_BACKWARD, BUTTON_ICON_SIZE));
@@ -242,6 +248,10 @@ public class SwingMPlayer extends JFrame {
         
         // Loop
         loopToggle = new JToggleButton(FontIcon.of(FontAwesomeSolid.REDO, BUTTON_ICON_SIZE));
+        loopToggle.setSelected((boolean) PropertyService.getInstance().getOrCreateProperty(
+                PropertyNamesConst.LOOP_PLAYLIST_PROPERTY_NAME, false).getRight());
+        loopToggle.addActionListener(e -> PropertyService.getInstance().setProperty(
+                new MutablePair<>(PropertyNamesConst.LOOP_PLAYLIST_PROPERTY_NAME, loopToggle.isSelected())));
         controlsPanel.add(loopToggle, "grow");
         
         // Add local
@@ -253,6 +263,11 @@ public class SwingMPlayer extends JFrame {
         JButton addRemoteButton = new JButton(FontIcon.of(FontAwesomeSolid.GLOBE, BUTTON_ICON_SIZE));
         addRemoteButton.addActionListener(e -> onAddRemoteButtonClicked());
         controlsPanel.add(addRemoteButton, "grow");
+        
+        // Settings
+        JButton settingsButton = new JButton(FontIcon.of(FontAwesomeSolid.COG, BUTTON_ICON_SIZE));
+        settingsButton.addActionListener(e -> onSettingsButtonClicked());
+        controlsPanel.add(settingsButton, "grow");
     }
     
     private void createWindowListeners() {
@@ -260,6 +275,25 @@ public class SwingMPlayer extends JFrame {
             public void windowClosing(WindowEvent e) {
                 close();
                 System.exit(0);
+            }
+        });
+    }
+    
+    private void createConfigListeners() {
+        PropertyService ps = PropertyService.getInstance();
+        ps.addPropertyChangeListener(e -> {
+            switch (e.getPropertyName()) {
+                case PropertyNamesConst.LOOP_PLAYLIST_PROPERTY_NAME:
+                    SwingUtilities.invokeLater(() -> {
+                        loopToggle.setSelected((Boolean) e.getNewValue());
+                    });
+                    break;
+                    
+                case PropertyNamesConst.SHOW_MEDIA_ATTRIBUTES_PROPERTY_NAME:
+                    SwingUtilities.invokeLater(() -> {
+                        ((PlaylistModel) playlist.getModel()).refresh();
+                    });
+                    break;
             }
         });
     }
@@ -354,7 +388,7 @@ public class SwingMPlayer extends JFrame {
         StringBuilder buf = new StringBuilder();
         if(currMediaAttribs.containsKey("audio.type")) {
             buf.append(currMediaAttribs.get("audio.type").toString()).append(" | ");
-            buf.append(format("{0,number,#} Hz | {1} bit | {2} channels", currMediaAttribs.get("audio.samplerate.hz"), 
+            buf.append(format("{0} Hz | {1} bit | {2} channels", currMediaAttribs.get("audio.samplerate.hz"), 
                     currMediaAttribs.get("audio.samplesize.bits"), currMediaAttribs.get("audio.channels")));
             
             if(currMediaAttribs.containsKey("bitrate")) {
@@ -481,6 +515,10 @@ public class SwingMPlayer extends JFrame {
         }
     }
     
+    private void onSettingsButtonClicked() {
+        SettingsDialog.showDialog(this);
+    }
+    
     private void onVolumeSliderMoved() {
         if(!volumeSlider.getValueIsAdjusting()) {
             int val = volumeSlider.getValue();
@@ -540,6 +578,17 @@ public class SwingMPlayer extends JFrame {
     /* Main */
     
     public static void main(String[] args) {
+        
+        // Parse command
+        Args arg = new Args();
+        JCommander.newBuilder().addObject(arg).build().parse(args);
+        
+        if(arg.isMockAudio()) {
+            
+            // Mock out the underlying audio system for debug purposes
+            AudioSystemWrapper.setDefaultSourceDataLine(new DummySourceDataLine());
+            LOG.log(Level.INFO, "Mock audio system enabled");
+        }
         
         BufferedImage image = null;
         try {

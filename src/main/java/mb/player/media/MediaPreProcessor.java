@@ -11,6 +11,9 @@ import java.util.logging.Logger;
 
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import mb.jflac.FLACDecoder;
 import mb.jflac.metadata.StreamInfo;
@@ -45,6 +48,19 @@ public class MediaPreProcessor {
     }
 
     private void process() {
+        
+        // Fetch artwork
+        try {
+            BufferedImage image = MPUtils.fetchMediaCoverArtSwing(media);
+            if(image != null) {
+                attributes.put("artwork", image);
+            }
+        } catch (IOException e) {
+            LOG.log(Level.FINE, "Fetching artwork of media ''{0}'' failed", media);
+            LOG.log(Level.FINE, e.getMessage(), e);
+        }
+        
+        // Fetch attributes
         if(media.isLocal()) {
             File audioFile = new File(URI.create(media.getSource()));
             
@@ -77,11 +93,20 @@ public class MediaPreProcessor {
                     
                     if(mp3file.hasId3v2Tag()) {
                         ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+                        attributes.put("title", id3v2Tag.getTitle());
                         attributes.put("artist", id3v2Tag.getArtist());
                         attributes.put("album", id3v2Tag.getAlbum());
                         
                         // TODO Fetch more attributes
-                        // TODO Fetch album art
+                        
+                        // Fetch album art
+                        if(attributes.get("artwork") == null) {
+                            byte[] bytes = id3v2Tag.getAlbumImage();
+                            if(bytes != null) {
+                                attributes.put("artwork", 
+                                        MPUtils.imageFromID3TagSwing(new ByteArrayInputStream(bytes)));
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     LOG.log(Level.WARNING, "MP3 pre processing failed", e);

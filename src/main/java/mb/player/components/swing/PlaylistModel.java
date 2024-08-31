@@ -1,5 +1,7 @@
 package mb.player.components.swing;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +23,7 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
     private List<MPMedia> mediaList;
     
     public PlaylistModel() {
-        mediaList = new ArrayList<MPMedia>();
+        mediaList = new ArrayList<>();
     }
 
     @Override
@@ -80,6 +82,10 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
         return removed;
     }
     
+    public void refresh() {
+        fireContentsChanged(this, 0, mediaList.size());
+    }
+    
     private void enrichMedia(Collection<? extends MPMedia> media, int idx0, int idx1) { 
         new SwingWorker<String, MPMedia>() {
             
@@ -88,6 +94,15 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
                 media.stream().forEach(m -> {
                     MediaPreProcessor mpp = new MediaPreProcessor(m);
                     m.setDurationSec(mpp.getDurationSec());
+                    m.setTitle((String) mpp.getAttributes().get("title"));
+                    m.setArtist((String) mpp.getAttributes().get("artist"));
+                    m.setAlbum((String) mpp.getAttributes().get("album"));
+                    m.setArtwork((BufferedImage) mpp.getAttributes().get("artwork"));
+                    
+                    if(m.getArtwork() != null) {
+                        m.setArtworkThumb(m.getArtwork().getScaledInstance(
+                                40, 40, Image.SCALE_SMOOTH));
+                    }
                     
                     // TODO Set additional attributes
                     

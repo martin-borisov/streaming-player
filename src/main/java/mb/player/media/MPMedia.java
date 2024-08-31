@@ -1,5 +1,7 @@
 package mb.player.media;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
 public class MPMedia implements Serializable {
@@ -16,6 +18,9 @@ public class MPMedia implements Serializable {
     private String name, source, user, password;
     private Type type;
     private long durationSec;
+    private String title, album, artist;
+    private transient BufferedImage artwork;
+    private transient Image artworkThumb;
     
     public MPMedia(String name, String source, Type type) {
         this.name = name;
@@ -81,6 +86,46 @@ public class MPMedia implements Serializable {
         this.durationSec = durationSec;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public BufferedImage getArtwork() {
+        return artwork;
+    }
+
+    public void setArtwork(BufferedImage artwork) {
+        this.artwork = artwork;
+    }
+
+    public Image getArtworkThumb() {
+        return artworkThumb;
+    }
+
+    public void setArtworkThumb(Image artworkThumb) {
+        this.artworkThumb = artworkThumb;
+    }
+    
     @Override
     public String toString() {
         return "MPMedia [name=" + name + ", source=" + source + ", type=" + type + "]";

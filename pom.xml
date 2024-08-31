@@ -1,14 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>mb.player</groupId>
     <artifactId>streaming-player</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Streaming Player</name>
+    <name>StreamingPlayer</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <repositories>
@@ -17,7 +19,7 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -71,9 +73,115 @@
             </plugin>
         </plugins>
     </build>
-    
+
+    <profiles>
+        
+        <profile>
+            
+            <!-- Build native unix executable -->
+            <id>nativeUnix</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.skife.maven</groupId>
+                        <artifactId>really-executable-jar-maven-plugin</artifactId>
+                        <version>2.1.1</version>
+                        <configuration>
+                            <inputFile>target/${project.artifactId}-${project.version}.jar</inputFile>
+                            <allowOtherTypes>true</allowOtherTypes>
+                            <programFile>streaming-player</programFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>really-executable-jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>zip-assembly-unix.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <!-- Builds native windows executable -->
+        <profile>
+            <id>nativeWindows</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                        <artifactId>launch4j-maven-plugin</artifactId>
+                        <version>2.5.1</version>
+                        <executions>
+                            <execution>
+                                <id>l4j-gui</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>launch4j</goal>
+                                </goals>
+                                <configuration>
+                                    <headerType>gui</headerType>
+                                    <outfile>target/${project.name}.exe</outfile>
+                                    <jar>${project.artifactId}-${project.version}.jar</jar>
+                                    <dontWrapJar>true</dontWrapJar>
+                                    <errTitle>StreamingPlayer</errTitle>
+                                    <classPath>
+                                        <mainClass>mb.player.components.swing.SwingMPlayer</mainClass>
+                                    </classPath>
+                                    <jre>
+                                        <minVersion>18</minVersion>
+                                    </jre>
+                                    <icon>${project.basedir}/native-resources/streaming-player-icon.ico</icon>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>zip-assembly-windows.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
-    
+
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>
@@ -81,7 +189,7 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        
+
         <!-- Runtime -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -98,6 +206,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.14.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.78</version>
+        </dependency>
 
         <!-- FLAC support -->
         <!-- Contains multiple fixes for the original jflac-codec -->
@@ -113,7 +226,7 @@
             <artifactId>mp3agic</artifactId>
             <version>0.9.1</version>
         </dependency>
-        
+
         <!-- MP3 support -->
         <dependency>
             <groupId>com.googlecode.soundlibs</groupId>
@@ -137,7 +250,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
         <!-- Swing Extras -->
         <dependency>
             <groupId>com.miglayout</groupId>
@@ -154,14 +267,14 @@
             <artifactId>ikonli-swing</artifactId>
             <version>12.3.1</version>
         </dependency>
-        
+
         <!-- WebDAV support -->
         <dependency>
             <groupId>com.github.lookfirst</groupId>
             <artifactId>sardine</artifactId>
             <version>5.10</version>
         </dependency>
-        
+
         <!-- Trying out stuff -->
         <dependency>
             <groupId>com.tagtraum</groupId>
