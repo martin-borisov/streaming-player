@@ -295,14 +295,34 @@ public class AudioPlayer {
         listeners.remove(listener);
     }
     
-    public float getVolume() {
+    public float getMaxVolume() {
         float value = 0;
         if(out != null) {
-            try {
-                FloatControl ctrl = (FloatControl) out.getControl(FloatControl.Type.MASTER_GAIN);
-                value = (float) Math.pow(10.0, ctrl.getValue() / 20.0);
-            } catch (IllegalArgumentException e) {
-                LOG.fine(e.getMessage());
+            FloatControl ctrl = getMasterGainControl();
+            if(ctrl != null) {
+                value = ctrl.getMaximum();
+            }
+        }
+        return value;
+    }
+    
+    public float getMinVolume() {
+        float value = 0;
+        if(out != null) {
+            FloatControl ctrl = getMasterGainControl();
+            if(ctrl != null) {
+                value = ctrl.getMinimum();
+            }
+        }
+        return value;
+    }
+    
+    public float getVolume() {
+        float value = 0;
+        if (out != null) {
+            FloatControl ctrl = getMasterGainControl();
+            if(ctrl != null) {
+                value = ctrl.getValue();
             }
         }
         return value;
@@ -310,14 +330,10 @@ public class AudioPlayer {
     
     public void setVolume(float value) {
         if(out != null) {
-            FloatControl ctrl;
-            try {
-                ctrl = (FloatControl) out.getControl(FloatControl.Type.MASTER_GAIN);
-            } catch (IllegalArgumentException e) {
-                LOG.fine(e.getMessage());
-                return;
+            FloatControl ctrl = getMasterGainControl();
+            if(ctrl != null) {
+                ctrl.setValue(value);
             }
-            ctrl.setValue((float) ((Math.log(value == 0.0 ? 0.0001 : value) / Math.log(10.0) * 20.0)));
         }
     }
     
@@ -419,6 +435,17 @@ public class AudioPlayer {
         }
     }
     
+    
+    private FloatControl getMasterGainControl() {
+        FloatControl ctrl = null;
+        try {
+            ctrl = (FloatControl) out.getControl(FloatControl.Type.MASTER_GAIN);
+        } catch (IllegalArgumentException e) {
+            fine("Master Gain control not aqvailable", e);
+        }
+        return ctrl;
+    }
+    
     private void fine(String msg) {
         LOG.fine(msg);
     }
@@ -488,5 +515,4 @@ public class AudioPlayer {
             }
         });
     }
-
 }

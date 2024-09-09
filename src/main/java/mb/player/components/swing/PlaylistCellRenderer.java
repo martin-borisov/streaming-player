@@ -15,6 +15,7 @@ import javax.swing.ListCellRenderer;
 import mb.player.components.swing.properties.PropertyService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeRegular;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -28,7 +29,7 @@ public class PlaylistCellRenderer extends JPanel implements ListCellRenderer<MPM
     private static final float DETAILS_FONT_SIZE_FACTOR = 0.9f;
     private static final int ICON_SIZE = 40;
     private static final Icon DEFAULT_ICON = 
-            FontIcon.of(FontAwesomeSolid.QUESTION, ICON_SIZE);
+            FontIcon.of(FontAwesomeRegular.FILE_IMAGE, ICON_SIZE);
     
     private JLabel imageLabel, nameLabel, sourceLabel, attribsLabel;
     private MPMedia currentlyPlayingMedia;

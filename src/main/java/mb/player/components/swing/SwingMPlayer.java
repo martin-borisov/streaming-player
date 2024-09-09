@@ -108,6 +108,7 @@ public class SwingMPlayer extends JFrame {
         try {
             player.open(new AudioSource(media.getSource()));
             player.play();
+            player.setVolume(volumeSlider.getValue());
         } catch (AudioPlayerException e) {
             LOG.log(Level.WARNING, "Audio playback failed", e);
             return;
@@ -239,7 +240,7 @@ public class SwingMPlayer extends JFrame {
         
         // Volume
         controlsPanel.add(new JLabel("Vol:"));
-        volumeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+        volumeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 0, 0);
         volumeSlider.addChangeListener(e -> onVolumeSliderMoved());
         controlsPanel.add(volumeSlider, "grow");
         
@@ -453,7 +454,8 @@ public class SwingMPlayer extends JFrame {
             updateTrackMetadata();
             timeSlider.setMaximum((int) (currentlyPlayingMpp.getDurationSec() > 0 ? 
                     currentlyPlayingMpp.getDurationSec() : 0));
-            volumeSlider.setValue((int) (player.getVolume() * 100));
+            volumeSlider.setMinimum((int) player.getMinVolume());
+            volumeSlider.setMaximum((int) player.getMaxVolume());
             imageCanvas.repaint();
         });
     }
@@ -521,8 +523,7 @@ public class SwingMPlayer extends JFrame {
     
     private void onVolumeSliderMoved() {
         if(!volumeSlider.getValueIsAdjusting()) {
-            int val = volumeSlider.getValue();
-            player.setVolume(val / 100);
+            player.setVolume(volumeSlider.getValue());
         }
     }
     
@@ -594,7 +595,7 @@ public class SwingMPlayer extends JFrame {
         try {
             image = ImageIO.read(SwingMPlayer.class.getResource(
                     "/streaming-player-icon.png"));
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG.log(Level.WARNING, "Loading app icon failed", e);
         }
         
