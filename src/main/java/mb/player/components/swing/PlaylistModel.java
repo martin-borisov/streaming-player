@@ -50,6 +50,9 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
     public void addElementsAt(int index, List<MPMedia> media) {
         mediaList.addAll(index, media);
         fireIntervalAdded(this, index, index + media.size());
+        
+        // Enrich media with additional attributes and fire update
+        enrichMedia(media, index, index + media.size());
     }
 
     public void addAll(Collection<? extends MPMedia> c) {
