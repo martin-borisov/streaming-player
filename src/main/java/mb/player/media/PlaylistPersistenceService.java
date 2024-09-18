@@ -13,11 +13,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PlaylistPersistenceService {
-    
     private static final Logger LOG = 
             Logger.getLogger(PlaylistPersistenceService.class.getName());
-    private static final String FILE_PATH = "playlist.bin";
     private static PlaylistPersistenceService ref;
+    private static final String FILE_NAME = "playlist.bin";
+    private static final String FILE_PATH;
+    static {
+        if(Boolean.valueOf(System.getProperty("mb.config.useHomeDir"))) {
+            FILE_PATH = System.getProperty("user.home") + "/.config/" + FILE_NAME;
+        } else {
+            FILE_PATH = FILE_NAME;
+        }
+    }
     
     public static PlaylistPersistenceService getInstance() {
         synchronized (PlaylistPersistenceService.class) {

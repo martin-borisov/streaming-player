@@ -1,6 +1,5 @@
 package mb.player.components.swing;
 
-import com.beust.jcommander.JCommander;
 import static java.text.MessageFormat.format;
 
 import java.awt.Canvas;
@@ -33,8 +32,10 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
@@ -46,14 +47,16 @@ import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
+import com.beust.jcommander.JCommander;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.github.sardine.DavResource;
 import com.github.sardine.SardineFactory;
-import mb.player.components.swing.properties.PropertyService;
 
+import mb.player.components.swing.properties.PropertyService;
 import mb.player.media.MPMedia;
 import mb.player.media.MPUtils;
 import mb.player.media.MediaPreProcessor;
@@ -65,7 +68,6 @@ import mb.player.media.audio.AudioSource;
 import mb.player.media.audio.AudioSystemWrapper;
 import mb.player.media.audio.DummySourceDataLine;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang3.tuple.MutablePair;
 
 public class SwingMPlayer extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -207,11 +209,11 @@ public class SwingMPlayer extends JFrame {
         
         /* Controls panel */
         JPanel controlsPanel = new JPanel(new MigLayout("wrap, fill", 
-                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][][][grow 1][grow 1][grow 1][grow 1]", 
+                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][grow 1][grow 1][grow 1][grow 1][grow 1]", 
                 "[][grow]"));
         add(controlsPanel, "grow");
         
-        controlsPanel.add(new JSeparator(SwingConstants.HORIZONTAL), "grow, spanx 13");
+        controlsPanel.add(new JSeparator(SwingConstants.HORIZONTAL), "grow, spanx 12");
         
         // Prev
         JButton prevButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_BACKWARD, BUTTON_ICON_SIZE));
@@ -238,14 +240,31 @@ public class SwingMPlayer extends JFrame {
         updatePlayTimeLabel(0);
         controlsPanel.add(playTimeLabel);
         
-        // Volume
-        controlsPanel.add(new JLabel("Vol:"));
-        volumeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 0, 0);
-        volumeSlider.addChangeListener(e -> onVolumeSliderMoved());
-        controlsPanel.add(volumeSlider, "grow");
-        
         // Separator
         controlsPanel.add(new JSeparator(SwingConstants.VERTICAL), "grow");
+        
+        // Volume
+        volumeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 0, 0);
+        volumeSlider.addChangeListener(e -> onVolumeSliderMoved());
+        
+        JMenuItem volumeMenu = new JMenuItem();
+        volumeMenu.add(volumeSlider);
+        volumeMenu.setEnabled(false);
+        JPopupMenu volumePopup = new JPopupMenu();
+        volumePopup.add(volumeMenu);
+        volumePopup.setPreferredSize(new Dimension(150, (int) volumePopup.getPreferredSize().getHeight()));
+        
+        
+        // TODO Change volume button icon as volume changes
+        JButton volumeButton = new JButton(FontIcon.of(FontAwesomeSolid.VOLUME_UP, BUTTON_ICON_SIZE));
+        volumeButton.setComponentPopupMenu(volumePopup);
+        
+        volumeButton.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                volumePopup.show(e.getComponent(), e.getX(), e.getY());
+            }
+        });
+        controlsPanel.add(volumeButton, "grow");
         
         // Loop
         loopToggle = new JToggleButton(FontIcon.of(FontAwesomeSolid.REDO, BUTTON_ICON_SIZE));
@@ -613,7 +632,7 @@ public class SwingMPlayer extends JFrame {
         if(Desktop.isDesktopSupported()) {
             try {
                 Desktop.getDesktop().setAboutHandler(e -> {
-                    JOptionPane.showMessageDialog(null, "Streaming Player v0.1", 
+                    JOptionPane.showMessageDialog(null, "Streaming Player v1.0", 
                             "About Streaming Player", JOptionPane.INFORMATION_MESSAGE, null);
                 });
             } catch (UnsupportedOperationException e) {

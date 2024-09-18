@@ -17,9 +17,16 @@ import java.util.stream.Collectors;
 
 public class ConfigService {
     private static final Logger LOG = Logger.getLogger(ConfigService.class.getName());
-    private static final String FILE_PATH = "config.properties";
-    
     private static ConfigService ref;
+    private static final String FILE_NAME = "config.properties";
+    private static final String FILE_PATH;
+    static {
+        if(Boolean.valueOf(System.getProperty("mb.config.useHomeDir"))) {
+            FILE_PATH = System.getProperty("user.home") + "/.config/" + FILE_NAME;
+        } else {
+            FILE_PATH = FILE_NAME;
+        }
+    }
     private Properties properties;
 
     public static ConfigService getInstance() {

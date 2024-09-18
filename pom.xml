@@ -11,6 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <stage.dir>stage</stage.dir>
     </properties>
 
     <repositories>
@@ -28,12 +29,13 @@
                 <version>3.6.1</version>
                 <executions>
                     <execution>
+                        <id>copy-deps-stage-lib</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <outputDirectory>${project.build.directory}/${stage.dir}/lib</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -53,6 +55,28 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-main-jar-stage</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>rename</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <sourceFile>${project.build.directory}/${project.artifactId}-${project.version}.jar</sourceFile>
+                                    <destinationFile>${project.build.directory}/${stage.dir}/${project.artifactId}-${project.version}.jar</destinationFile>
+                                </fileSet>
+                            </fileSets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.6.0</version>
@@ -67,6 +91,7 @@
                             <descriptors>
                                 <descriptor>zip-assembly.xml</descriptor>
                             </descriptors>
+                            <finalName>StreamingPlayerPortable</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -79,15 +104,17 @@
         <profile>
             
             <!-- Build native unix executable -->
-            <id>nativeUnix</id>
+            <id>nativeMacOS</id>
             <build>
                 <plugins>
+                    
+                    <!--
                     <plugin>
                         <groupId>org.skife.maven</groupId>
                         <artifactId>really-executable-jar-maven-plugin</artifactId>
                         <version>2.1.1</version>
                         <configuration>
-                            <inputFile>target/${project.artifactId}-${project.version}.jar</inputFile>
+                            <inputFile>${project.build.directory}/${stage.dir}/${project.artifactId}-${project.version}.jar</inputFile>
                             <allowOtherTypes>true</allowOtherTypes>
                             <programFile>streaming-player</programFile>
                         </configuration>
@@ -100,6 +127,8 @@
                             </execution>
                         </executions>
                     </plugin>
+                    -->
+                    <!--
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -119,10 +148,88 @@
                             </execution>
                         </executions>
                     </plugin>
+                    -->
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>${project.name}</name>
+                                    <input>${project.build.directory}/${stage.dir}</input>
+                                    <mainjar>${project.build.directory}/${stage.dir}/${project.artifactId}-${project.version}.jar</mainjar>
+                                    <type>PKG</type>
+                                    <javaoptions>-Dmb.config.useHomeDir=true</javaoptions>
+                                    <dest>${project.build.directory}</dest>
+                                    <appversion>1.0</appversion>
+                                    <vendor>Martin Borisov</vendor>
+                                    <licensefile>${project.basedir}/LICENSE</licensefile>
+                                    <resourcedir>${project.basedir}/native-resources/macos</resourcedir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!--
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jlink-maven-plugin</artifactId>
+                        <version>0.1.11</version>
+                        <configuration>
+                            <noheaderfiles>true</noheaderfiles>
+                            <nomanpages>true</nomanpages>
+                            <compress>
+                                <compression>ZIP</compression>
+                            </compress>
+                            <stripdebug>true</stripdebug>
+                            <addmodules>
+                                <addmodule>java.base</addmodule>
+                                <addmodule>java.xml</addmodule>
+                                
+                            </addmodules>
+                        </configuration>
+                    </plugin>
+                    -->
+                    
+                    
                 </plugins>
             </build>
         </profile>
-        
+
+        <profile>
+            <id>nativeLinux</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>${project.name}</name>
+                                    <input>${project.build.directory}/${stage.dir}</input>
+                                    <mainjar>${project.build.directory}/${stage.dir}/${project.artifactId}-${project.version}.jar</mainjar>
+                                    <type>RPM</type>
+                                    <javaoptions>-Dmb.config.useHomeDir=true</javaoptions>
+                                    <dest>${project.build.directory}</dest>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <!-- Builds native windows executable -->
         <profile>
             <id>nativeWindows</id>
@@ -151,7 +258,7 @@
                                     <jre>
                                         <minVersion>18</minVersion>
                                     </jre>
-                                    <icon>${project.basedir}/native-resources/streaming-player-icon.ico</icon>
+                                    <icon>${project.basedir}/native-resources/win/streaming-player-icon.ico</icon>
                                 </configuration>
                             </execution>
                         </executions>
