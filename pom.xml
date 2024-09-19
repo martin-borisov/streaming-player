@@ -12,6 +12,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <stage.dir>stage</stage.dir>
+        <package.version>1.0</package.version>
     </properties>
 
     <repositories>
@@ -125,7 +126,7 @@
                                     <type>PKG</type>
                                     <javaoptions>-Dmb.config.useHomeDir=true</javaoptions>
                                     <dest>${project.build.directory}</dest>
-                                    <appversion>1.0</appversion>
+                                    <appversion>${package.version}</appversion>
                                     <vendor>Martin Borisov</vendor>
                                     <licensefile>${project.basedir}/LICENSE</licensefile>
                                     <resourcedir>${project.basedir}/native-resources/macos</resourcedir>
@@ -190,7 +191,7 @@
                                     <type>EXE</type>
                                     <javaoptions>-Dmb.config.useHomeDir=true</javaoptions>
                                     <dest>${project.build.directory}</dest>
-                                    <appversion>2.0</appversion>
+                                    <appversion>${package.version}</appversion>
                                     <vendor>Martin Borisov</vendor>
                                     <licensefile>${project.basedir}/LICENSE</licensefile>
                                     <windirchooser>true</windirchooser>
