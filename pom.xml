@@ -36,6 +36,7 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/${stage.dir}/lib</outputDirectory>
+
                         </configuration>
                     </execution>
                 </executions>
@@ -107,48 +108,6 @@
             <id>nativeMacOS</id>
             <build>
                 <plugins>
-                    
-                    <!--
-                    <plugin>
-                        <groupId>org.skife.maven</groupId>
-                        <artifactId>really-executable-jar-maven-plugin</artifactId>
-                        <version>2.1.1</version>
-                        <configuration>
-                            <inputFile>${project.build.directory}/${stage.dir}/${project.artifactId}-${project.version}.jar</inputFile>
-                            <allowOtherTypes>true</allowOtherTypes>
-                            <programFile>streaming-player</programFile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>really-executable-jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    -->
-                    <!--
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>single</goal>
-                                </goals>
-                                <configuration>
-                                    <appendAssemblyId>false</appendAssemblyId>
-                                    <descriptors>
-                                        <descriptor>zip-assembly-unix.xml</descriptor>
-                                    </descriptors>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    -->
                     <plugin>
                         <groupId>com.github.akman</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
@@ -174,29 +133,6 @@
                             </execution>
                         </executions>
                     </plugin>
-
-                    <!--
-                    <plugin>
-                        <groupId>com.github.akman</groupId>
-                        <artifactId>jlink-maven-plugin</artifactId>
-                        <version>0.1.11</version>
-                        <configuration>
-                            <noheaderfiles>true</noheaderfiles>
-                            <nomanpages>true</nomanpages>
-                            <compress>
-                                <compression>ZIP</compression>
-                            </compress>
-                            <stripdebug>true</stripdebug>
-                            <addmodules>
-                                <addmodule>java.base</addmodule>
-                                <addmodule>java.xml</addmodule>
-                                
-                            </addmodules>
-                        </configuration>
-                    </plugin>
-                    -->
-                    
-                    
                 </plugins>
             </build>
         </profile>
@@ -231,53 +167,37 @@
         </profile>
 
         <!-- Builds native windows executable -->
+        <!-- NB: WiX tools have to be installed and in the path -->
         <profile>
             <id>nativeWindows</id>
             <build>
                 <plugins>
+
                     <plugin>
-                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                        <artifactId>launch4j-maven-plugin</artifactId>
-                        <version>2.5.1</version>
-                        <executions>
-                            <execution>
-                                <id>l4j-gui</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>launch4j</goal>
-                                </goals>
-                                <configuration>
-                                    <headerType>gui</headerType>
-                                    <outfile>target/${project.name}.exe</outfile>
-                                    <jar>${project.artifactId}-${project.version}.jar</jar>
-                                    <dontWrapJar>true</dontWrapJar>
-                                    <errTitle>StreamingPlayer</errTitle>
-                                    <classPath>
-                                        <mainClass>mb.player.components.swing.SwingMPlayer</mainClass>
-                                    </classPath>
-                                    <jre>
-                                        <minVersion>18</minVersion>
-                                    </jre>
-                                    <icon>${project.basedir}/native-resources/win/streaming-player-icon.ico</icon>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.6.0</version>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
                                 <goals>
-                                    <goal>single</goal>
+                                    <goal>jpackage</goal>
                                 </goals>
                                 <configuration>
-                                    <appendAssemblyId>false</appendAssemblyId>
-                                    <descriptors>
-                                        <descriptor>zip-assembly-windows.xml</descriptor>
-                                    </descriptors>
+                                    <name>${project.name}</name>
+                                    <input>${project.build.directory}/${stage.dir}</input>
+                                    <mainjar>${project.artifactId}-${project.version}.jar</mainjar>
+                                    <type>EXE</type>
+                                    <javaoptions>-Dmb.config.useHomeDir=true</javaoptions>
+                                    <dest>${project.build.directory}</dest>
+                                    <appversion>2.0</appversion>
+                                    <vendor>Martin Borisov</vendor>
+                                    <licensefile>${project.basedir}/LICENSE</licensefile>
+                                    <windirchooser>true</windirchooser>
+                                    <winmenu>true</winmenu>
+                                    <winshortcut>true</winshortcut>
+                                    <verbose>true</verbose>
+                                    <icon>${project.basedir}/native-resources/win/StreamingPlayer.ico</icon>
                                 </configuration>
                             </execution>
                         </executions>
