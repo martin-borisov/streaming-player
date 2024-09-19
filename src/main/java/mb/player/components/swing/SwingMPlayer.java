@@ -79,6 +79,7 @@ public class SwingMPlayer extends JFrame {
     private MediaPreProcessor currentlyPlayingMpp;
     private Map<String, Object> currMediaAttribs;
     private BufferedImage currArtwork;
+    private File prevSelDir;
     
     private Playlist playlist;
     private JLabel titleLabel, artistAlbumLabel, formatLabel, playTimeLabel;
@@ -513,6 +514,7 @@ public class SwingMPlayer extends JFrame {
         chooser.setMultiSelectionEnabled(true);
         chooser.setFileFilter(new FileNameExtensionFilter(
                 "Supported Audio Files", "mp3", "flac", "wav"));
+        chooser.setCurrentDirectory(prevSelDir);
         if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             
             File[] files = chooser.getSelectedFiles();
@@ -522,6 +524,7 @@ public class SwingMPlayer extends JFrame {
                 .sorted((m1, m2) -> StringUtils.compare(m1.getName(), m2.getName()))
                 .collect(Collectors.toList());
             ((PlaylistModel) playlist.getModel()).addAll(media);
+            prevSelDir = chooser.getCurrentDirectory();
         }
     }
     
