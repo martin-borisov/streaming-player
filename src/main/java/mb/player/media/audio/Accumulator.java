@@ -15,4 +15,9 @@ public class Accumulator {
     public long getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "Accumulator [value=" + value + "]";
+    }
 }

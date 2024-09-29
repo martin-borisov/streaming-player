@@ -37,7 +37,7 @@ public class AudioPlayer {
     private AudioFormat targetFormat;
     private AudioInputStream encodedIn, decodedIn;
     private SourceDataLine out;
-    private volatile boolean keepRunning, seekRequested;
+    private volatile boolean keepRunning;
     private List<AudioPlayerListener> listeners;
     private Accumulator totalBytesSincePlayStarted;
     
@@ -157,126 +157,53 @@ public class AudioPlayer {
     }
     
     public void seekTo(int sec) throws AudioPlayerException {
+        // TODO Validate requested seek length based on track length
+        
         verifyInitializedAndOpen();
         
-        seekRequested = true;
+        // Calculate the byte index to which to skip from the provided second
+        final int bytesPerSecond = (int) (targetFormat.getSampleRate() * targetFormat.getFrameSize());
+        final int numBytesToSkip = bytesPerSecond * sec;
+        fine(format("Trying to seek to sec {0} and byte index {1,number,#}", sec, numBytesToSkip));
         
-        // TODO Don't trigger listeners
-        pause();
-        out.stop();
+        // Prepare audio resources
+        prepareResourcesForSeek();
         
+        // Read all bytes until the number of bytes are skipped without writing to output data line
+        int bytesRead = 0;
+        byte[] buffer = new byte[calcBufferSize()];
+        Accumulator totalBytesRead = new Accumulator();
         
-        // TODO Best approach seems to be to quickly read all bytes up to the designated second
-        // as skip() is not supported by all audio stream formats
-        int bytesPerSecond = (int) (targetFormat.getSampleRate() * targetFormat.getFrameSize());
-        int byteToSkipTo = bytesPerSecond * sec;
-        
-        // Reset streams
-        setupStreams(source);
-        
-        // Try to skip first
-        try {
-            decodedIn.skip(byteToSkipTo);
-        } catch (IOException e1) {
-            fine("Skip attempt on decoded stream failed", e1);
-            
-            // Skip bytes
-            byte[] buffer = new byte[byteToSkipTo];
+        if(sec > 0) {
             try {
-                int bytesRead = decodedIn.read(buffer, 0, buffer.length);
-                fine(format("Skipped {0} bytes", bytesRead));
-            } catch (IOException e2) {
-                fine("Reading bytes failed", e2);
-            }
-            
-        }
-        
-        
-        
-//        int bytesRead = -1;
-//        try {
-//            while (keepRunning && (bytesRead = decodedIn.read(buffer, 0, buffer.length)) != -1) {
-//                
-//                // Write data to data line
-//                /*
-//                int writtenNow = out.write(buffer, 0, bytesRead);
-//                bytesWritten.add(writtenNow);
-//                totalBytesSincePlayStarted.add(writtenNow);
-//                final int elapsedSeconds = (int) (totalBytesSincePlayStarted.getValue() / bytesPerSecond);
-//                */
-//            }
-//        } catch (IOException e) {
-//            LOG.log(Level.SEVERE, "Audio playback failed", e);
-//        }
-        
-        /*
-        new Thread(() -> {
-            
-            // Do some preparation for progress event handling
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            final int bytesPerSecond = (int) (targetFormat.getSampleRate() * targetFormat.getFrameSize());
-            Accumulator bytesWritten = new Accumulator();
-            
-            int bytesRead = -1;
-            try {
-                while (keepRunning && (bytesRead = decodedIn.read(buffer, 0, buffer.length)) != -1) {
-                    
-                    // Write data to data line
-                    int writtenNow = out.write(buffer, 0, bytesRead);
-                    bytesWritten.add(writtenNow);
-                    totalBytesSincePlayStarted.add(writtenNow);
-                    final int elapsedSeconds = (int) (totalBytesSincePlayStarted.getValue() / bytesPerSecond);
-                    
-                    // Notify listeners of progress asynchronously
-                    if(bytesWritten.getValue() >= bytesPerSecond) {
-                        executor.execute(() -> {
-                            synchronized (listeners) {
-                                listeners.forEach(l -> l.onProgress(elapsedSeconds));
-                            }
-                        });
-                        bytesWritten.reset();
-                    }
+                while (totalBytesRead.getValue() < numBytesToSkip
+                        && (bytesRead = decodedIn.read(buffer, 0, buffer.length)) != -1) {
+                    totalBytesRead.add(bytesRead);
                 }
             } catch (IOException e) {
-                LOG.log(Level.SEVERE, "Audio playback failed", e);
+                fine("Reading bytes failed", e);
             }
-            
-            // Check if stream ended or externally paused
-            if(keepRunning) {
-                fine("End of stream reached; playback thread completing");
-                keepRunning = false;
-                postEndOfMediaEvent();
-            } else {
-                fine("Stream paused; playback thread completing");
-            }
-            executor.shutdown();
-            
-        }).start();
-        */
-        
-        
-        play();
-        
-        /*
-        int frameSize = decodedIn.getFormat().getFrameSize();
-        int sampleRate = (int) decodedIn.getFormat().getSampleRate();
-        int bytesPerSecond = sampleRate * frameSize;
-        int elapsedSeconds = (int) (totalBytesSincePlayStarted.getValue() / bytesPerSecond);
-        int secToSkip = sec - elapsedSeconds;
-        long bytesToSkip = secToSkip * bytesPerSecond;
-        
-        LOG.fine(format("Frame size: {0}, Frame rate: {1,number,#}, Bytes per sec: {2,number,#}, "
-                + "Elapsed sec: {3,number,#}, Sec to skip: {4,number,#}, Bytes to skip: {5,number,#}", 
-                frameSize, sampleRate, bytesPerSecond, elapsedSeconds, secToSkip, bytesToSkip));
-        
-        pause();
-        try {
-            decodedIn.skip(bytesToSkip);
-        } catch (IOException e) {
-            LOG.log(Level.WARNING, "Seeking stream failed", e);
         }
-        resume();   
-        */     
+        
+        // Update elapsed time
+        final int elapsedSeconds = (int) (totalBytesRead.getValue() / bytesPerSecond);
+        fine(format("Seeked to {0,number,#} bytes and {1} seconds", totalBytesRead.getValue(), elapsedSeconds));
+                    
+        // Notify listeners of progress asynchronously
+        if (elapsedSeconds > 0) {
+            new Thread(() -> {
+                synchronized (listeners) {
+                    listeners.forEach(l -> l.onProgress(elapsedSeconds));
+                }
+            }).start();
+        }
+        
+        // Play
+        totalBytesSincePlayStarted.reset();
+        totalBytesSincePlayStarted.add(totalBytesRead.getValue());
+        resumePlayAfterSeek();
+        
+        // TODO Notify listeners for seek completion
     }
     
     public boolean isPlaying() {
@@ -335,6 +262,10 @@ public class AudioPlayer {
                 ctrl.setValue(value);
             }
         }
+    }
+    
+    public boolean isSeekSupported() {
+        return decodedIn != null && source.isFile();
     }
     
     /* Private */
@@ -441,9 +372,31 @@ public class AudioPlayer {
         try {
             ctrl = (FloatControl) out.getControl(FloatControl.Type.MASTER_GAIN);
         } catch (IllegalArgumentException e) {
-            fine("Master Gain control not aqvailable", e);
+            fine(format("Master Gain control not available on source data line: {0}", out.getLineInfo()), e);
         }
         return ctrl;
+    }
+    
+    private void prepareResourcesForSeek() {
+        
+        // Stop playback
+        keepRunning = false;
+        
+        // Invalidate input streams
+        closeAudioInputStream(encodedIn);
+        encodedIn = null;
+        closeAudioInputStream(decodedIn);
+        decodedIn = null;
+        
+        try {
+            setupStreams(source);
+        } catch (AudioPlayerException e) {
+            fine("Streams reset for seek failed", e);
+        }
+    }
+    
+    private void resumePlayAfterSeek() throws AudioPlayerException {
+        startAudioPlaybackThread();
     }
     
     private void fine(String msg) {

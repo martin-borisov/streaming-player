@@ -1,13 +1,8 @@
 package mb.player.test;
 
-import mb.player.media.audio.DummySourceDataLine;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 
 import org.junit.Before;
@@ -16,6 +11,7 @@ import org.junit.Test;
 import mb.player.media.audio.AudioPlayer;
 import mb.player.media.audio.AudioPlayerListener;
 import mb.player.media.audio.AudioSystemWrapper;
+import mb.player.media.audio.DummySourceDataLine;
 
 public class AudioPlayerTest {
     

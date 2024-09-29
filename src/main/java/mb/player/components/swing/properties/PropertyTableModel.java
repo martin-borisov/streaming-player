@@ -6,6 +6,7 @@ import javax.swing.table.AbstractTableModel;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class PropertyTableModel extends AbstractTableModel {
+    private static final long serialVersionUID = 1L;
     private static final String[] COLUMN_NAMES = new String[]{"Name", "Value"};
     
     private List<MutablePair<String, Object>> properties;

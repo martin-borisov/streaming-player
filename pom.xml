@@ -37,7 +37,6 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.directory}/${stage.dir}/lib</outputDirectory>
-
                         </configuration>
                     </execution>
                 </executions>
@@ -304,10 +303,12 @@
         </dependency>
 
         <!-- Trying out stuff -->
+        <!--
         <dependency>
             <groupId>com.tagtraum</groupId>
             <artifactId>ffsampledsp-complete</artifactId>
             <version>0.9.53</version>
         </dependency>
+        -->
     </dependencies>
 </project>

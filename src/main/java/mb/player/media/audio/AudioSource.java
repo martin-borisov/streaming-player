@@ -61,16 +61,20 @@ public class AudioSource {
         return is;
     }
     
-    public File getFile() {
-        return file;
-    }
-
     public boolean isFile() {
         return file != null;
     }
     
+    public File getFile() {
+        return file;
+    }
+    
     public boolean isURL() {
         return url != null;
+    }
+    
+    public URL getURL() {
+        return url;
     }
 
     @Override

@@ -9,6 +9,7 @@ import javax.swing.table.TableCellEditor;
 import org.apache.commons.lang3.BooleanUtils;
 
 public class PropertyTableValueCellEditor extends AbstractCellEditor implements TableCellEditor {
+    private static final long serialVersionUID = 1L;
     
     private JTextField textField;
     private JComboBox<String> comboBox;

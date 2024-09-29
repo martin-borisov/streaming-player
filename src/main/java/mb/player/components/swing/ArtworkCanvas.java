@@ -5,7 +5,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 public class ArtworkCanvas extends Canvas {
-
+    private static final long serialVersionUID = 1L;
+    
     private BufferedImage image;
     
     public void paint(Graphics g) {

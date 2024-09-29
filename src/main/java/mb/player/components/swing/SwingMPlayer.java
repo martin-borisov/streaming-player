@@ -214,7 +214,9 @@ public class SwingMPlayer extends JFrame {
                 "[][grow]"));
         add(controlsPanel, "grow");
         
-        controlsPanel.add(new JSeparator(SwingConstants.HORIZONTAL), "grow, spanx 12");
+        JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
+        sep.setMinimumSize(new Dimension((int) sep.getMinimumSize().getWidth(), 5));
+        controlsPanel.add(sep, "grow, spanx 12");
         
         // Prev
         JButton prevButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_BACKWARD, BUTTON_ICON_SIZE));
@@ -234,6 +236,12 @@ public class SwingMPlayer extends JFrame {
         // Time slider
         controlsPanel.add(new JLabel("Time:"));
         timeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
+        timeSlider.addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                onTimeSliderMoveByUserFinished();
+            }
+        });
+        timeSlider.addChangeListener(e -> onTimeSliderMoved());
         controlsPanel.add(timeSlider, "grow");
         
         // Time label
@@ -474,6 +482,7 @@ public class SwingMPlayer extends JFrame {
             updateTrackMetadata();
             timeSlider.setMaximum((int) (currentlyPlayingMpp.getDurationSec() > 0 ? 
                     currentlyPlayingMpp.getDurationSec() : 0));
+            timeSlider.setEnabled(player.isSeekSupported());
             volumeSlider.setMinimum((int) player.getMinVolume());
             volumeSlider.setMaximum((int) player.getMaxVolume());
             imageCanvas.repaint();
@@ -546,6 +555,25 @@ public class SwingMPlayer extends JFrame {
     private void onVolumeSliderMoved() {
         if(!volumeSlider.getValueIsAdjusting()) {
             player.setVolume(volumeSlider.getValue());
+        }
+    }
+    
+    private void onTimeSliderMoveByUserFinished() {
+        try {
+            player.seekTo(timeSlider.getValue());
+        } catch (AudioPlayerException e) {
+            LOG.log(Level.FINE, "Seek failed", e);
+        }
+    }
+    
+    private void onTimeSliderMoved() {
+        
+        // Only react if user is currently adjusting the slider
+        if(timeSlider.getValueIsAdjusting()) {
+            
+            // Updating the label here is ok as it happens during user adjustment
+            // See onPlayerPrpogress(...)
+            updatePlayTimeLabel(timeSlider.getValue());
         }
     }
     
