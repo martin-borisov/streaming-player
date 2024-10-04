@@ -47,6 +47,7 @@ import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
@@ -114,6 +115,15 @@ public class SwingMPlayer extends JFrame {
             player.setVolume(volumeSlider.getValue());
         } catch (AudioPlayerException e) {
             LOG.log(Level.WARNING, "Audio playback failed", e);
+            
+            StringBuilder buf = new StringBuilder();
+            if(e.getMessage() != null) {
+                buf.append(e.getMessage()).append("\n");
+            }
+            buf.append(ExceptionUtils.getRootCauseMessage(e));
+            
+            JOptionPane.showMessageDialog(null, buf.toString(), 
+                    "Playback Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
