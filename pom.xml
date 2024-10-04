@@ -5,7 +5,7 @@
     <groupId>mb.player</groupId>
     <artifactId>streaming-player</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>StreamingPlayer</name>
+    <name>Streaming Player</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -123,7 +123,7 @@
                                     <input>${project.build.directory}/${stage.dir}</input>
                                     <mainjar>${project.build.directory}/${stage.dir}/${project.artifactId}-${project.version}.jar</mainjar>
                                     <type>PKG</type>
-                                    <javaoptions>-Dmb.config.useHomeDir=true</javaoptions>
+                                    <javaoptions>-Dmb.config.useHomeDir=true -Xdock:name="Streaming Player"</javaoptions>
                                     <dest>${project.build.directory}</dest>
                                     <appversion>${package.version}</appversion>
                                     <vendor>Martin Borisov</vendor>
