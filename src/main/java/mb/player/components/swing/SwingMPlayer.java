@@ -427,7 +427,7 @@ public class SwingMPlayer extends JFrame {
         StringBuilder buf = new StringBuilder();
         if(currMediaAttribs.containsKey("audio.type")) {
             buf.append(currMediaAttribs.get("audio.type").toString()).append(" | ");
-            buf.append(format("{0} Hz | {1} bit | {2} channels", currMediaAttribs.get("audio.samplerate.hz"), 
+            buf.append(format("{0,number,#} Hz | {1} bit | {2} channels", currMediaAttribs.get("audio.samplerate.hz"), 
                     currMediaAttribs.get("audio.samplesize.bits"), currMediaAttribs.get("audio.channels")));
             
             if(currMediaAttribs.containsKey("bitrate")) {
