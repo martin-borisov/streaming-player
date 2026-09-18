@@ -16,13 +16,13 @@ public class PlaylistPersistenceService {
     private static final Logger LOG = 
             Logger.getLogger(PlaylistPersistenceService.class.getName());
     private static PlaylistPersistenceService ref;
-    private static final String FILE_NAME = "playlist.bin";
-    private static final String FILE_PATH;
+    private static final String DEFAULT_FILE_NAME = "playlist.bin";
+    private static final String DEFAULT_FILE_PATH;
     static {
         if(Boolean.valueOf(System.getProperty("mb.config.useHomeDir"))) {
-            FILE_PATH = System.getProperty("user.home") + "/.config/" + FILE_NAME;
+            DEFAULT_FILE_PATH = System.getProperty("user.home") + "/.config/" + DEFAULT_FILE_NAME;
         } else {
-            FILE_PATH = FILE_NAME;
+            DEFAULT_FILE_PATH = DEFAULT_FILE_NAME;
         }
     }
     
@@ -38,15 +38,19 @@ public class PlaylistPersistenceService {
     private PlaylistPersistenceService() {
     }
     
-    @SuppressWarnings("unchecked")
     public List<MPMedia> loadPlaylist() {
+        return loadPlaylist(DEFAULT_FILE_PATH);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<MPMedia> loadPlaylist(String path) {
         List<MPMedia> playlist = new ArrayList<>();
-        if(Files.exists(Paths.get(FILE_PATH))) {
+        if(Files.exists(Paths.get(path))) {
             
             FileInputStream fis = null;
             ObjectInputStream ois = null;
             try {
-                fis = new FileInputStream(FILE_PATH);
+                fis = new FileInputStream(path);
                 ois = new ObjectInputStream(fis);
                 return (List<MPMedia>) ois.readObject();
             } catch (Exception e) {
@@ -73,11 +77,15 @@ public class PlaylistPersistenceService {
     }
     
     public void savePlaylist(List<MPMedia> playlist) {
+        savePlaylist(playlist, DEFAULT_FILE_PATH);
+    }
+    
+    public void savePlaylist(List<MPMedia> playlist, String path) {
         
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
         try {
-            fos = new FileOutputStream(FILE_PATH);
+            fos = new FileOutputStream(path);
             oos = new ObjectOutputStream(fos);
             oos.writeObject(playlist);
         } catch (Exception e) {

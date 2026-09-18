@@ -32,6 +32,8 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -161,6 +163,23 @@ public class SwingMPlayer extends JFrame {
     
     private void createAndLayoutComponents() {
         setLayout(new MigLayout("insets 0, gap 0, wrap, fill", "[]", "[grow][][]"));
+        
+        /* Menu bar */
+        JMenuBar menuBar = new JMenuBar();
+        
+        // Playlist menu
+        JMenu plMenu = new JMenu("Playlist");
+        setJMenuBar(menuBar);
+        
+        JMenuItem loadPlMenuItem = new JMenuItem("Load...");
+        loadPlMenuItem.addActionListener(e -> onLoadPlaylistMenuItemClicked());
+        plMenu.add(loadPlMenuItem);
+        
+        JMenuItem savePlMenuItem = new JMenuItem("Save...");
+        savePlMenuItem.addActionListener(e -> onSavePlayistMenuItemClicked());
+        plMenu.add(savePlMenuItem);
+        
+        menuBar.add(plMenu);
         
         /* Playlist */
         add(new JScrollPane(playlist = new Playlist()), "grow");
@@ -585,6 +604,22 @@ public class SwingMPlayer extends JFrame {
             // See onPlayerPrpogress(...)
             updatePlayTimeLabel(timeSlider.getValue());
         }
+    }
+    
+    private void onSavePlayistMenuItemClicked() {
+        JFileChooser fc = new JFileChooser();
+        if(JFileChooser.APPROVE_OPTION == fc.showSaveDialog(this)) {
+            File file = fc.getSelectedFile();
+            
+            // Save current playlist to file
+            PlaylistPersistenceService.getInstance().savePlaylist(
+                    ((PlaylistModel) playlist.getModel()).getAll(), 
+                    file.getAbsolutePath());
+        }
+    }
+    
+    private void onLoadPlaylistMenuItemClicked() {
+        // TODO Load selected playlist
     }
     
     /* Utils */
