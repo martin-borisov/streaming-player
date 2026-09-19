@@ -608,6 +608,7 @@ public class SwingMPlayer extends JFrame {
     
     private void onSavePlayistMenuItemClicked() {
         JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Save Playlist");
         if(JFileChooser.APPROVE_OPTION == fc.showSaveDialog(this)) {
             File file = fc.getSelectedFile();
             
@@ -619,7 +620,21 @@ public class SwingMPlayer extends JFrame {
     }
     
     private void onLoadPlaylistMenuItemClicked() {
-        // TODO Load selected playlist
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Load Playlist");
+        fc.setApproveButtonText("Load");
+        if(JFileChooser.APPROVE_OPTION == fc.showOpenDialog(this)) {
+            File file = fc.getSelectedFile();
+            
+            // Load playlist from file
+            List<MPMedia> pl = PlaylistPersistenceService.getInstance().loadPlaylist(file.getAbsolutePath());
+            if(pl != null) {
+            	((PlaylistModel) playlist.getModel()).removeAll();
+                ((PlaylistModel) playlist.getModel()).addAll(pl);
+            } else {
+            	// TODO Show warning message that this file is not a playlist
+            }
+        }
     }
     
     /* Utils */

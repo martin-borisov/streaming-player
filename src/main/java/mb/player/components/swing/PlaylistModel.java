@@ -85,6 +85,12 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
         return removed;
     }
     
+    public void removeAll() {
+    	int endIdx = mediaList.size() - 1;
+    	mediaList.clear();
+    	fireIntervalRemoved(this, 0, endIdx);
+    }
+    
     public void refresh() {
         fireContentsChanged(this, 0, mediaList.size());
     }
