@@ -1,7 +1,10 @@
 package mb.player.media;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,14 +12,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sound.sampled.AudioFileFormat;
+
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
-import mb.jflac.FLACDecoder;
 import mb.jflac.metadata.StreamInfo;
+import mb.jflac.sound.spi.FlacAudioFileReader;
 
 public class MediaPreProcessor {
     
@@ -65,12 +67,15 @@ public class MediaPreProcessor {
             File audioFile = new File(URI.create(media.getSource()));
             
             if(media.getSource().endsWith("flac")) {
-                
-                try(FileInputStream fis = new FileInputStream(audioFile)) {
-                    
-                    FLACDecoder decoder = new FLACDecoder(fis);
-                    decoder.decode();
-                    StreamInfo info = decoder.getStreamInfo();
+
+                FlacAudioFileReader reader = new FlacAudioFileReader();
+                try {
+					AudioFileFormat format = reader.getAudioFileFormat(audioFile);
+					
+					// Getting the total sample count requires a quick hack unfortunately
+					Field streamInfoField = reader.getClass().getDeclaredField("streamInfo");
+					streamInfoField.setAccessible(true);
+					StreamInfo info = (StreamInfo) streamInfoField.get(reader);
                     if(info != null) {
                         totalSamples = info.getTotalSamples();
                         sampleRate = info.getSampleRate();
@@ -79,10 +84,13 @@ public class MediaPreProcessor {
                             durationSec = (long) (totalSamples / sampleRate);
                         }
                     }
-                } catch (Exception e) {
-                    LOG.log(Level.WARNING, "FLAC pre processing failed", e);
-                } 
-                
+					
+					// Fetch properties
+                    attributes.putAll(format.properties());
+
+				} catch (Exception e) {
+					LOG.log(Level.WARNING, "FLAC pre processing failed", e);
+				}
             } else if(media.getSource().endsWith("mp3")) {
                 
                 try {
