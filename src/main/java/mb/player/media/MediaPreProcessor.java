@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class MediaPreProcessor {
             BufferedImage image = MPUtils.fetchMediaCoverArtSwing(media);
             if(image != null) {
                 attributes.put("artwork", image);
+                LOG.log(Level.FINE, "Successfully fetched artwork of media ''{0}''", media);
             }
         } catch (IOException e) {
             LOG.log(Level.FINE, "Fetching artwork of media ''{0}'' failed", media);
@@ -72,6 +74,16 @@ public class MediaPreProcessor {
         } else if(media.getSource().endsWith("wav")) {
             // TODO Support for WAV metadata
         }
+        
+        LOG.log(Level.FINE, () -> {
+            StringBuilder buf = new StringBuilder();
+            buf.append(MessageFormat.format("Found {0} attributes of media ''{1}''", 
+                    attributes.size(), media));
+            attributes.forEach((k, v) -> {
+                buf.append("\n - <").append(v.getClass().getSimpleName()).append("> ").append(k).append(" = ").append(v);
+            });
+            return buf.toString();
+        });
     }
     
     private void processMp3(MPMedia media) {
@@ -123,8 +135,9 @@ public class MediaPreProcessor {
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                 con.setAuthenticator(MPUtils.createAuthenticator(media));
                 if(con.getResponseCode() != 200) {
-                    LOG.log(Level.WARNING, "FLAC pre processing failed; received HTTP response code: {0}", 
-                            new Object[]{con.getResponseCode()});
+                    LOG.log(Level.WARNING, 
+                            "FLAC pre processing failed; received HTTP response code: {0}", 
+                            con.getResponseCode());
                     return;
                 }
                 

@@ -86,7 +86,7 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
     }
     
     public void removeAll() {
-    	int endIdx = mediaList.size() - 1;
+    	int endIdx = mediaList.size();
     	mediaList.clear();
     	fireIntervalRemoved(this, 0, endIdx);
     }
@@ -101,19 +101,23 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
             @Override
             protected String doInBackground() throws Exception {
                 media.stream().forEach(m -> {
-                    MediaPreProcessor mpp = new MediaPreProcessor(m);
-                    m.setDurationSec(mpp.getDurationSec());
-                    m.setTitle((String) mpp.getAttributes().get("title"));
-                    m.setArtist((String) mpp.getAttributes().get("artist"));
-                    m.setAlbum((String) mpp.getAttributes().get("album"));
-                    m.setArtwork((BufferedImage) mpp.getAttributes().get("artwork"));
+                    
+                    //if(!m.isMetadataStored()) {
+                        MediaPreProcessor mpp = new MediaPreProcessor(m);
+                        m.setDurationSec(mpp.getDurationSec());
+                        m.setTitle((String) mpp.getAttributes().get("title"));
+                        m.setArtist((String) mpp.getAttributes().get("artist"));
+                        m.setAlbum((String) mpp.getAttributes().get("album"));
+                        m.setArtwork((BufferedImage) mpp.getAttributes().get("artwork"));
+                    
+                        // TODO Set additional attributes
+                        //m.setMetadataStored(true);
+                    //}
                     
                     if(m.getArtwork() != null) {
                         m.setArtworkThumb(m.getArtwork().getScaledInstance(
                                 40, 40, Image.SCALE_SMOOTH));
                     }
-                    
-                    // TODO Set additional attributes
                     
                     publish(m);
                 });

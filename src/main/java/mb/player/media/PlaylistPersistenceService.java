@@ -2,7 +2,6 @@ package mb.player.media;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
@@ -46,32 +45,15 @@ public class PlaylistPersistenceService {
     public List<MPMedia> loadPlaylist(String path) {
         List<MPMedia> playlist = new ArrayList<>();
         if(Files.exists(Paths.get(path))) {
-            
-            FileInputStream fis = null;
-            ObjectInputStream ois = null;
-            try {
-                fis = new FileInputStream(path);
-                ois = new ObjectInputStream(fis);
+            try(FileInputStream fis = new FileInputStream(path);
+                    ObjectInputStream ois = new ObjectInputStream(fis)) {
                 return (List<MPMedia>) ois.readObject();
             } catch (Exception e) {
                 LOG.log(Level.WARNING, "Playlist file not found", e);
                 return null;
-            } finally {
-                if(ois != null) {
-                    try {
-                        ois.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-                }
-                if(fis != null) {
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        // Ignore
-                    }
-                }
             }
+        } else {
+            LOG.log(Level.WARNING, "Path ''{0}'' does not exist", path);
         }
         return playlist;
     }
@@ -81,30 +63,11 @@ public class PlaylistPersistenceService {
     }
     
     public void savePlaylist(List<MPMedia> playlist, String path) {
-        
-        FileOutputStream fos = null;
-        ObjectOutputStream oos = null;
-        try {
-            fos = new FileOutputStream(path);
-            oos = new ObjectOutputStream(fos);
+        try(FileOutputStream fos = new FileOutputStream(path);
+                ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(playlist);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            if(oos != null) {
-                try {
-                    oos.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
-            if(fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    // Ignore
-                }
-            }
         }
     }
 }
