@@ -1,7 +1,6 @@
 package mb.player.components.swing;
 
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -101,19 +100,9 @@ public class PlaylistModel extends AbstractListModel<MPMedia> {
             @Override
             protected String doInBackground() throws Exception {
                 media.stream().forEach(m -> {
+                    new MediaPreProcessor(m);
                     
-                    //if(!m.isMetadataStored()) {
-                        MediaPreProcessor mpp = new MediaPreProcessor(m);
-                        m.setDurationSec(mpp.getDurationSec());
-                        m.setTitle((String) mpp.getAttributes().get("title"));
-                        m.setArtist((String) mpp.getAttributes().get("artist"));
-                        m.setAlbum((String) mpp.getAttributes().get("album"));
-                        m.setArtwork((BufferedImage) mpp.getAttributes().get("artwork"));
-                    
-                        // TODO Set additional attributes
-                        //m.setMetadataStored(true);
-                    //}
-                    
+                    // Set thumbnail for the playlist
                     if(m.getArtwork() != null) {
                         m.setArtworkThumb(m.getArtwork().getScaledInstance(
                                 40, 40, Image.SCALE_SMOOTH));

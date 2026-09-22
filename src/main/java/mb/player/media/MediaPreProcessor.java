@@ -75,6 +75,7 @@ public class MediaPreProcessor {
             // TODO Support for WAV metadata
         }
         
+        // A bit of useful verbose logging
         LOG.log(Level.FINE, () -> {
             StringBuilder buf = new StringBuilder();
             buf.append(MessageFormat.format("Found {0} attributes of media ''{1}''", 
@@ -84,6 +85,15 @@ public class MediaPreProcessor {
             });
             return buf.toString();
         });
+        
+        // Set attributes in media
+        media.setDurationSec(getDurationSec());
+        media.setTitle((String) attributes.get("title"));
+        media.setArtist((String) attributes.get("artist"));
+        media.setAlbum((String) attributes.get("album"));
+        media.setArtwork((BufferedImage) attributes.get("artwork"));
+        
+        // TODO Add more attributes to media
     }
     
     private void processMp3(MPMedia media) {

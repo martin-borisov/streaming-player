@@ -491,7 +491,7 @@ public class SwingMPlayer extends JFrame {
     
     private void onMediaOpened(Map<String, Object> properties) {
         
-        // Append attributes from player and preprocessor
+        // Merge attributes from player and media preprocessor
         currMediaAttribs = new HashMap<>(properties);
         currMediaAttribs.putAll(currentlyPlayingMpp.getAttributes());
         
