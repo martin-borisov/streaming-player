@@ -239,13 +239,13 @@ public class SwingMPlayer extends JFrame {
         
         /* Controls panel */
         JPanel controlsPanel = new JPanel(new MigLayout("wrap, fill", 
-                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][grow 1][grow 1][grow 1][grow 1][grow 1]", 
+                "[grow 1][grow 1][grow 1][align right][grow 10][][align right][grow 1][grow 1][grow 1][grow 1][grow 1][grow 1]", 
                 "[][grow]"));
         add(controlsPanel, "grow");
         
         JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
         sep.setMinimumSize(new Dimension((int) sep.getMinimumSize().getWidth(), 5));
-        controlsPanel.add(sep, "grow, spanx 12");
+        controlsPanel.add(sep, "grow, spanx 13");
         
         // Prev
         JButton prevButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_BACKWARD, BUTTON_ICON_SIZE));
@@ -280,6 +280,11 @@ public class SwingMPlayer extends JFrame {
         
         // Separator
         controlsPanel.add(new JSeparator(SwingConstants.VERTICAL), "grow");
+        
+        // Info
+        JButton infoButton = new JButton(FontIcon.of(FontAwesomeSolid.INFO, BUTTON_ICON_SIZE));
+        infoButton.addActionListener(e -> onInfoButtonClicked());
+        controlsPanel.add(infoButton, "grow");
         
         // Volume
         volumeSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 0, 0);
@@ -545,6 +550,25 @@ public class SwingMPlayer extends JFrame {
                 }
             }
         });
+    }
+    
+    private void onInfoButtonClicked() {
+        
+        List<MutablePair<String, Object>> properties = currMediaAttribs.entrySet().stream().map((entry) -> {
+            return new MutablePair<String, Object>(entry.getKey(), entry.getValue());
+        }).collect(Collectors.toList());
+        
+        
+        // TODO Add the following dialog enhancements:
+        // 1) Non-editable
+        // 2) Sortable and sorted alphabetically by default
+        // 3) Support for sopying values from the teable
+        
+        SettingsDialog dialog = new SettingsDialog(this, properties);
+        dialog.setTitle("Media Attributes");
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        dialog.dispose();
     }
     
     private void onAddLocalButtonClicked() {
