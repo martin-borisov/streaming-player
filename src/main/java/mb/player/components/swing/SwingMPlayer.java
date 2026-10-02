@@ -87,7 +87,7 @@ public class SwingMPlayer extends JFrame {
     private Playlist playlist;
     private JLabel titleLabel, artistAlbumLabel, formatLabel, playTimeLabel;
     private Canvas imageCanvas;
-    private JButton playButton;
+    private JButton playButton, infoButton;
     private Timer playButtonBlinkTimer;
     private JSlider timeSlider, volumeSlider;
     private JToggleButton loopToggle;
@@ -225,6 +225,21 @@ public class SwingMPlayer extends JFrame {
             }
         };
         imageCanvas.setMinimumSize(new Dimension(100, 100)); // This is needed for proper canvas resizing
+        imageCanvas.addMouseListener(new MouseAdapter() {
+            public void mouseReleased(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+            public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+            }
+            private void maybeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    // TODO onShowArtworkPopup
+                    //popup.show(e.getComponent(),
+                    //           e.getX(), e.getY());
+                }
+            }
+        });
         trackPanel.add(imageCanvas, "spany 3");
         
         // Artist & album
@@ -282,8 +297,9 @@ public class SwingMPlayer extends JFrame {
         controlsPanel.add(new JSeparator(SwingConstants.VERTICAL), "grow");
         
         // Info
-        JButton infoButton = new JButton(FontIcon.of(FontAwesomeSolid.INFO, BUTTON_ICON_SIZE));
+        infoButton = new JButton(FontIcon.of(FontAwesomeSolid.INFO, BUTTON_ICON_SIZE));
         infoButton.addActionListener(e -> onInfoButtonClicked());
+        infoButton.setEnabled(false);
         controlsPanel.add(infoButton, "grow");
         
         // Volume
@@ -525,10 +541,12 @@ public class SwingMPlayer extends JFrame {
     
     private void onPlaybackStarted() {
         startPlayButtonBlink();
+        infoButton.setEnabled(true);
     }
     
     private void onPlaybackStopped() {
         stopPlayButtonBlink();
+        infoButton.setEnabled(false);
     }
     
     private void onEndOfMedia() {
@@ -558,13 +576,8 @@ public class SwingMPlayer extends JFrame {
             return new MutablePair<String, Object>(entry.getKey(), entry.getValue());
         }).collect(Collectors.toList());
         
-        
-        // TODO Add the following dialog enhancements:
-        // 1) Non-editable
-        // 2) Sortable and sorted alphabetically by default
-        // 3) Support for sopying values from the teable
-        
-        SettingsDialog dialog = new SettingsDialog(this, properties);
+        // Create a non-editable properties dialog
+        PropertiesDialog dialog = new PropertiesDialog(this, properties, false);
         dialog.setTitle("Media Attributes");
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
@@ -602,7 +615,7 @@ public class SwingMPlayer extends JFrame {
     }
     
     private void onSettingsButtonClicked() {
-        SettingsDialog.showDialog(this);
+        PropertiesDialog.showDialog(this);
     }
     
     private void onVolumeSliderMoved() {
