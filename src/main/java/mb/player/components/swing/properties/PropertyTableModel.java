@@ -67,6 +67,4 @@ public class PropertyTableModel extends AbstractTableModel {
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return editable && columnIndex == 1;
     }
-    
-    
 }

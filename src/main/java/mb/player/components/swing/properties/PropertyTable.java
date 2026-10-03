@@ -5,7 +5,7 @@ import javax.swing.JTable;
 public class PropertyTable extends JTable {
     private static final long serialVersionUID = 1L;
     
-    private PropertyTableModel model;
+    private final PropertyTableModel model;
 
     public PropertyTable(boolean editable) {
         setModel(model = new PropertyTableModel(editable));
@@ -16,12 +16,8 @@ public class PropertyTable extends JTable {
         }
     }
 
+    @Override
     public PropertyTableModel getModel() {
         return model;
     }
-    
-    
-    
-    
-    
 }

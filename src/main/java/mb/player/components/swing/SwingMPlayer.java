@@ -234,9 +234,7 @@ public class SwingMPlayer extends JFrame {
             }
             private void maybeShowPopup(MouseEvent e) {
                 if (e.isPopupTrigger()) {
-                    // TODO onShowArtworkPopup
-                    //popup.show(e.getComponent(),
-                    //           e.getX(), e.getY());
+                    onShowCanvasPopup();
                 }
             }
         });
@@ -517,14 +515,11 @@ public class SwingMPlayer extends JFrame {
         currMediaAttribs.putAll(currentlyPlayingMpp.getAttributes());
         
         // Fetch artwork
-        try {
-            currArtwork = MPUtils.fetchMediaCoverArtSwing(currentlyPlayingMedia);
-            if(currArtwork == null) {
-                currArtwork = MPUtils.imageFromID3TagSwing(
-                        (ByteArrayInputStream) currMediaAttribs.get("mp3.id3tag.v2"));
-            }
-        } catch (IOException e) {
-            LOG.log(Level.WARNING, "Loading album art failed", e);
+        Object obj = currMediaAttribs.get("artwork");
+        if(obj instanceof BufferedImage img) {
+            currArtwork = img;
+        } else {
+            LOG.log(Level.FINE, "Artwork attribute is not a BufferedImage");
             currArtwork = null;
         }
         
@@ -671,6 +666,15 @@ public class SwingMPlayer extends JFrame {
             } else {
             	// TODO Show warning message that this file is not a playlist
             }
+        }
+    }
+    
+    private void onShowCanvasPopup() {
+        // TODO Should be double click
+        
+        Object obj = currMediaAttribs.get("artwork");
+        if(obj instanceof BufferedImage) {
+            BufferedImage img = (BufferedImage) obj;
         }
     }
     
