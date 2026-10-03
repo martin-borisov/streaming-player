@@ -10,9 +10,11 @@ public class PropertyTableModel extends AbstractTableModel {
     private static final String[] COLUMN_NAMES = new String[]{"Name", "Value"};
     
     private List<MutablePair<String, Object>> properties;
+    private boolean editable;
 
-    public PropertyTableModel() {
+    public PropertyTableModel(boolean editable) {
         properties = new ArrayList<>();
+        this.editable = editable;
         
     }
 
@@ -63,7 +65,7 @@ public class PropertyTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex == 1;
+        return editable && columnIndex == 1;
     }
     
     

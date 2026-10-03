@@ -8,7 +8,7 @@ public class PropertyTable extends JTable {
     private PropertyTableModel model;
 
     public PropertyTable(boolean editable) {
-        setModel(model = new PropertyTableModel());
+        setModel(model = new PropertyTableModel(editable));
         getColumn("Value").setCellRenderer(new PropertyTableValueCellRenderer());
         
         if(editable) {
