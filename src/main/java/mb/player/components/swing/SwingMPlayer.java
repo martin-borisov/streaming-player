@@ -226,17 +226,11 @@ public class SwingMPlayer extends JFrame {
         };
         imageCanvas.setMinimumSize(new Dimension(100, 100)); // This is needed for proper canvas resizing
         imageCanvas.addMouseListener(new MouseAdapter() {
-            public void mouseReleased(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-            public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-            private void maybeShowPopup(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    onShowCanvasPopup();
+            public void mouseClicked(MouseEvent e) {
+                if(e.getClickCount() == 2 && e.getButton() == MouseEvent.BUTTON1) {
+                    onCanvasDoublecClick();
                 }
-            }
+            }  
         });
         trackPanel.add(imageCanvas, "spany 3");
         
@@ -669,12 +663,11 @@ public class SwingMPlayer extends JFrame {
         }
     }
     
-    private void onShowCanvasPopup() {
-        // TODO Should be double click
-        
+    private void onCanvasDoublecClick() {
         Object obj = currMediaAttribs.get("artwork");
-        if(obj instanceof BufferedImage) {
-            BufferedImage img = (BufferedImage) obj;
+        if(obj instanceof BufferedImage img) {
+            ArtworkDialog dialog = new ArtworkDialog(this, img, currentlyPlayingMedia.getName());
+            dialog.setVisible(true);
         }
     }
     
