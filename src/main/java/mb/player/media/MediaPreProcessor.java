@@ -81,7 +81,7 @@ public class MediaPreProcessor {
             buf.append(MessageFormat.format("Found {0} attributes of media ''{1}''", 
                     attributes.size(), media));
             attributes.forEach((k, v) -> {
-                buf.append("\n - <").append(v.getClass().getSimpleName()).append("> ").append(k).append(" = ").append(v);
+                buf.append("\n - <").append(v != null ? v.getClass().getSimpleName() : "null").append("> ").append(k).append(" = ").append(v);
             });
             return buf.toString();
         });

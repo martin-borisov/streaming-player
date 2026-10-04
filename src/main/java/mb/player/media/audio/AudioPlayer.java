@@ -156,7 +156,7 @@ public class AudioPlayer {
         listeners.forEach(l -> l.onStop());
     }
     
-    public void seekTo(int sec) throws AudioPlayerException {
+    public void seekTo(int sec, boolean resume) throws AudioPlayerException {
         // TODO Validate requested seek length based on track length
         
         verifyInitializedAndOpen();
@@ -201,7 +201,10 @@ public class AudioPlayer {
         // Play
         totalBytesSincePlayStarted.reset();
         totalBytesSincePlayStarted.add(totalBytesRead.getValue());
-        resumePlayAfterSeek();
+        
+        if(resume) {
+            resumePlayAfterSeek();
+        }
         
         // TODO Notify listeners for seek completion
     }

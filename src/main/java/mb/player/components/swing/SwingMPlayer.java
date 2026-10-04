@@ -614,7 +614,7 @@ public class SwingMPlayer extends JFrame {
     
     private void onTimeSliderMoveByUserFinished() {
         try {
-            player.seekTo(timeSlider.getValue());
+            player.seekTo(timeSlider.getValue(), player.isPlaying());
         } catch (AudioPlayerException e) {
             LOG.log(Level.FINE, "Seek failed", e);
         }
