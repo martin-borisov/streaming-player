@@ -1,6 +1,8 @@
 package mb.player.media.audio;
 
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,6 +11,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -21,6 +24,28 @@ public class AudioSystemWrapper {
      * Used for unit testing
      */
     private static SourceDataLine defaultSourceDataLine;
+    
+    public static String listDevices() {
+        
+        StringBuilder buf = new StringBuilder();
+        Arrays.stream(AudioSystem.getMixerInfo()).forEach(i -> {
+            buf.append(MessageFormat.format("Mixer -> Name: ''{0}'' | Vendor: ''{1}'' | Version: ''{2}'' | Descr: ''{3}''", 
+                    i.getName(), i.getVendor(), i.getVersion(), i.getDescription()))
+                    .append('\n');
+            Mixer m = AudioSystem.getMixer(i);
+            
+            Arrays.stream(m.getSourceLineInfo()).forEach(li -> {
+                buf.append(MessageFormat.format("--- Soure Line -> Class:''{0}'' | Descr: ''{1}''", li.getLineClass(), li))
+                        .append('\n');
+            });
+            
+            Arrays.stream(m.getTargetLineInfo()).forEach(ti -> {
+                buf.append(MessageFormat.format("--- Target Line -> Class:''{0}'' | Descr: ''{1}''", ti.getLineClass(), ti))
+                        .append('\n');
+            });
+        });
+        return buf.toString();
+    }
 
     public static AudioFileFormat getAudioFileFormat(final AudioSource source)
             throws UnsupportedAudioFileException, IOException, AudioPlayerException {

@@ -255,16 +255,19 @@ public class SwingMPlayer extends JFrame {
         
         // Prev
         JButton prevButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_BACKWARD, BUTTON_ICON_SIZE));
+        prevButton.setToolTipText("Play Previous");
         prevButton.addActionListener(e -> playPrev());
         controlsPanel.add(prevButton, "grow");
         
         // Play
         controlsPanel.add(playButton = new JButton(FontIcon.of(FontAwesomeSolid.PLAY, BUTTON_ICON_SIZE)), "grow");
+        prevButton.setToolTipText("Play/Pause");
         playButton.addActionListener(e -> onPlayButtonClicked());
         createPlayButtonBlinkTimer();
         
         // Next
         JButton nextButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_FORWARD, BUTTON_ICON_SIZE));
+        prevButton.setToolTipText("Play Next");
         nextButton.addActionListener(e -> playNext());
         controlsPanel.add(nextButton, "grow");
         
@@ -289,8 +292,9 @@ public class SwingMPlayer extends JFrame {
         
         // Info
         infoButton = new JButton(FontIcon.of(FontAwesomeSolid.INFO, BUTTON_ICON_SIZE));
-        infoButton.addActionListener(e -> onInfoButtonClicked());
+        infoButton.setToolTipText("Show additional info on the currently playing media");
         infoButton.setEnabled(false);
+        infoButton.addActionListener(e -> onInfoButtonClicked());
         controlsPanel.add(infoButton, "grow");
         
         // Volume
@@ -326,16 +330,19 @@ public class SwingMPlayer extends JFrame {
         
         // Add local
         JButton addLocalButton = new JButton(FontIcon.of(FontAwesomeSolid.PLUS, BUTTON_ICON_SIZE));
+        addLocalButton.setToolTipText("Browse and add local files to playlist");
         addLocalButton.addActionListener(e -> onAddLocalButtonClicked());
         controlsPanel.add(addLocalButton, "grow");
         
         // Add remote
         JButton addRemoteButton = new JButton(FontIcon.of(FontAwesomeSolid.GLOBE, BUTTON_ICON_SIZE));
+        addRemoteButton.setToolTipText("Add media from WebDAV storage to playlist");
         addRemoteButton.addActionListener(e -> onAddRemoteButtonClicked());
         controlsPanel.add(addRemoteButton, "grow");
         
         // Settings
         JButton settingsButton = new JButton(FontIcon.of(FontAwesomeSolid.COG, BUTTON_ICON_SIZE));
+        settingsButton.setToolTipText("Various global settings");
         settingsButton.addActionListener(e -> onSettingsButtonClicked());
         controlsPanel.add(settingsButton, "grow");
     }
@@ -722,6 +729,11 @@ public class SwingMPlayer extends JFrame {
     /* Main */
     
     public static void main(String[] args) {
+        
+        // A bit of moderately useful verbose logging before initialization
+        LOG.log(Level.FINE, () -> {
+            return AudioSystemWrapper.listDevices();
+        });
         
         // Parse command
         Args arg = new Args();
