@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 public class PropertyService {
     
     private static PropertyService ref;
-    private EventListenerSupport<PropertyChangeListener> listenerSupport = 
+    private final EventListenerSupport<PropertyChangeListener> listenerSupport = 
             EventListenerSupport.create(PropertyChangeListener.class);
 
     public static PropertyService getInstance() {
@@ -46,6 +46,10 @@ public class PropertyService {
         String value = ConfigService.getInstance().getOrCreateProperty(key, 
                 PropertyTypeConverter.propertyToString(defaultValue));
         return new MutablePair<>(key, PropertyTypeConverter.stringToProperty(value));
+    }
+    
+    public Object getPropertyValue(String key) {
+        return PropertyTypeConverter.stringToProperty(ConfigService.getInstance().getProperty(key));
     }
     
     public void setProperty(MutablePair<String, Object> property) {

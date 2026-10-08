@@ -57,6 +57,11 @@ import com.beust.jcommander.JCommander;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.github.sardine.DavResource;
 import com.github.sardine.SardineFactory;
+import java.awt.event.KeyEvent;
+import java.text.MessageFormat;
+import javax.sound.sampled.Mixer;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButtonMenuItem;
 
 import mb.player.components.swing.properties.PropertyService;
 import mb.player.media.MPMedia;
@@ -134,6 +139,13 @@ public class SwingMPlayer extends JFrame {
     
     private void createPlayer() {
         player = new AudioPlayer();
+        
+        MutablePair<String, Object> deviceProp = PropertyService.getInstance().getOrCreateProperty(
+                PropertyNamesConst.SELECTED_DEVICE_PROP_NAME, PropertyNamesConst.SELECTED_DEVICE_DEFAULT_VALUE);
+        if(!PropertyNamesConst.SELECTED_DEVICE_DEFAULT_VALUE.equals(deviceProp.getValue())) {
+            player.setMixerInfo(AudioSystemWrapper.getMixerInfoByName((String) deviceProp.getValue()));
+        }
+        
         player.addListener(new AudioPlayerListener() {
             public void onOpen(Map<String, Object> properties) {
                 onMediaOpened(properties);
@@ -165,10 +177,11 @@ public class SwingMPlayer extends JFrame {
         
         /* Menu bar */
         JMenuBar menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
         
         // Playlist menu
         JMenu plMenu = new JMenu("Playlist");
-        setJMenuBar(menuBar);
+        plMenu.setMnemonic(KeyEvent.VK_P);
         
         JMenuItem loadPlMenuItem = new JMenuItem("Load...");
         loadPlMenuItem.addActionListener(e -> onLoadPlaylistMenuItemClicked());
@@ -179,6 +192,41 @@ public class SwingMPlayer extends JFrame {
         plMenu.add(savePlMenuItem);
         
         menuBar.add(plMenu);
+        
+        // Edit medu
+        JMenu editMenu = new JMenu("Edit");
+        editMenu.setMnemonic(KeyEvent.VK_E);
+        menuBar.add(editMenu);
+        
+        JMenu deviceMenu = new JMenu("Playback Device");
+        deviceMenu.setMnemonic(KeyEvent.VK_D);
+        editMenu.add(deviceMenu);
+        
+        MutablePair<String, Object> deviceProp = PropertyService.getInstance().getOrCreateProperty(
+                PropertyNamesConst.SELECTED_DEVICE_PROP_NAME, PropertyNamesConst.SELECTED_DEVICE_DEFAULT_VALUE);
+        
+        ButtonGroup group = new ButtonGroup();
+        JRadioButtonMenuItem autoselectRadioMenuItem = new JRadioButtonMenuItem("Autoselect");
+        autoselectRadioMenuItem.setToolTipText(
+                "The system selects the most appropriate device for the requested audio format");
+        autoselectRadioMenuItem.setSelected(
+                PropertyNamesConst.SELECTED_DEVICE_DEFAULT_VALUE.equals(deviceProp.getValue()));
+        autoselectRadioMenuItem.addActionListener(e -> onDeviceSelected(null));
+        group.add(autoselectRadioMenuItem);
+        deviceMenu.add(autoselectRadioMenuItem);
+        deviceMenu.addSeparator();
+
+        // Get all system devices and create a radio button for each
+        Arrays.stream(AudioSystemWrapper.getAllMixerInfos()).forEach(i -> {
+
+            JRadioButtonMenuItem radioMenuItem = new JRadioButtonMenuItem(i.getName());
+            radioMenuItem.setToolTipText(MessageFormat.format("Device Name: ''{0}'' | Vendor: ''{1}'' | Version: ''{2}'' | Details: ''{3}''", 
+                            i.getName(), i.getVendor(), i.getVersion(), i.getDescription()));
+            radioMenuItem.addActionListener(e -> onDeviceSelected(i));
+            radioMenuItem.setSelected(i.getName().equals(deviceProp.getValue()));
+            group.add(radioMenuItem);
+            deviceMenu.add(radioMenuItem);
+        }); 
         
         /* Playlist */
         add(new JScrollPane(playlist = new Playlist()), "grow");
@@ -675,6 +723,20 @@ public class SwingMPlayer extends JFrame {
             ArtworkDialog dialog = new ArtworkDialog(this, img, currentlyPlayingMedia.getName());
             dialog.setVisible(true);
         }
+    }
+    
+    private void onDeviceSelected(Mixer.Info info) {
+        
+        // It's safe to pass null, which means autoselect
+        player.setMixerInfo(info);
+        
+        // Persist selected device
+        String value = PropertyNamesConst.SELECTED_DEVICE_DEFAULT_VALUE;
+        if (info != null) {
+            value = info.getName();
+        }
+        PropertyService.getInstance().setProperty(new MutablePair<>(
+                PropertyNamesConst.SELECTED_DEVICE_PROP_NAME, value));
     }
     
     /* Utils */

@@ -23,6 +23,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -33,6 +34,7 @@ public class AudioPlayer {
     private static final int DEFAULT_BUFFER_SIZE = 4096;
     
     private AudioSource source;
+    private Mixer.Info mixerInfo;
     private AudioFileFormat sourceFormat;
     private AudioFormat targetFormat;
     private AudioInputStream encodedIn, decodedIn;
@@ -74,8 +76,9 @@ public class AudioPlayer {
             setupStreams(source);
             
             fine("Getting data line for audio out");
-            out = getSourceDataLine(targetFormat);
-            fine("Data line successfully returned by system: " + out.getFormat());
+            out = getSourceDataLine(targetFormat, mixerInfo);
+            fine("Data line successfully returned by system for format: " + out.getFormat() + 
+                    ", mixer: " + (mixerInfo != null ? mixerInfo.getName() : "Autoselect"));
             
             fine("Adding line listener which handles player events");
             out.addLineListener(event -> postAudioPlayerEventFromLineEvent(event));
@@ -223,6 +226,14 @@ public class AudioPlayer {
     
     public void removeListener(AudioPlayerListener listener) {
         listeners.remove(listener);
+    }
+
+    public Mixer.Info getMixerInfo() {
+        return mixerInfo;
+    }
+
+    public void setMixerInfo(Mixer.Info mixerInfo) {
+        this.mixerInfo = mixerInfo;
     }
     
     public float getMaxVolume() {
@@ -446,9 +457,9 @@ public class AudioPlayer {
         return AudioSystem.getAudioInputStream(format, ais);
     }
     
-    private static SourceDataLine getSourceDataLine(AudioFormat format) throws AudioPlayerException {
+    private static SourceDataLine getSourceDataLine(AudioFormat format, Mixer.Info mixerInfo) throws AudioPlayerException {
         try {
-            return AudioSystemWrapper.getSourceDataLine(format);
+            return AudioSystemWrapper.getSourceDataLine(format, mixerInfo);
         } catch (LineUnavailableException e) {
             throw new AudioPlayerException(e);
         }

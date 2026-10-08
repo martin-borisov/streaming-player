@@ -25,8 +25,15 @@ public class AudioSystemWrapper {
      */
     private static SourceDataLine defaultSourceDataLine;
     
+    public static Mixer.Info getMixerInfoByName(String name) {
+        return Arrays.stream(getAllMixerInfos()).filter(i -> i.getName().equals(name)).findFirst().orElse(null);
+    }
+    
+    public static Mixer.Info[] getAllMixerInfos() {
+        return AudioSystem.getMixerInfo();
+    }
+    
     public static String listDevices() {
-        
         StringBuilder buf = new StringBuilder();
         Arrays.stream(AudioSystem.getMixerInfo()).forEach(i -> {
             buf.append(MessageFormat.format("Mixer -> Name: ''{0}'' | Vendor: ''{1}'' | Version: ''{2}'' | Descr: ''{3}''", 
@@ -103,9 +110,11 @@ public class AudioSystemWrapper {
         return stream;
     }
     
-    /**
-     * Used for unit testing
-     */
+    public static SourceDataLine getSourceDataLine(AudioFormat format, Mixer.Info info) throws LineUnavailableException {
+        return defaultSourceDataLine != null ? defaultSourceDataLine : 
+                (info != null ? AudioSystem.getSourceDataLine(format, info) : AudioSystem.getSourceDataLine(format));
+    }
+    
     public static SourceDataLine getSourceDataLine(AudioFormat format) throws LineUnavailableException {
         return defaultSourceDataLine != null ? 
                 defaultSourceDataLine : AudioSystem.getSourceDataLine(format);
