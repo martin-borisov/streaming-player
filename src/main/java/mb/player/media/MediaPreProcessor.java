@@ -3,7 +3,6 @@ package mb.player.media;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -55,15 +54,10 @@ public class MediaPreProcessor {
     private void process() {
         
         // Fetch artwork
-        try {
-            BufferedImage image = MPUtils.fetchMediaCoverArtSwing(media);
-            if(image != null) {
-                attributes.put("artwork", image);
-                LOG.log(Level.FINE, "Successfully fetched artwork of media ''{0}''", media);
-            }
-        } catch (IOException e) {
-            LOG.log(Level.FINE, "Fetching artwork of media ''{0}'' failed", media);
-            LOG.log(Level.FINE, e.getMessage(), e);
+        BufferedImage image = MPUtils.fetchMediaCoverArt(media);
+        if(image != null) {
+            attributes.put("artwork", image);
+            LOG.log(Level.FINE, "Successfully fetched artwork of media ''{0}''", media);
         }
         
         // Fetch attributes

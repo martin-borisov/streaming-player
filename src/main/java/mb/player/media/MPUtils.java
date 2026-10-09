@@ -9,13 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
-import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -61,49 +56,16 @@ public class MPUtils {
         }
     }
     
-    public static InputStream fetchMediaCoverArtInputStream(MPMedia media) throws IOException {
-        
-        InputStream is = null;
+    public static BufferedImage fetchMediaCoverArt(MPMedia media) {
+        BufferedImage image = null;
         String source = media.getSource();
         int idx = source.lastIndexOf('/');
         if(idx > -1) {
             String path = source.substring(0, idx + 1); // Keep the forward slash
-        
-            if(media.isLocal()) {
-                
-                Path fullPath = Paths.get(URI.create(path + "cover.jpg"));
-                if(Files.exists(fullPath)) {
-                    is = Files.newInputStream(fullPath);
-                } else {
-                    LOG.fine(format("Cover image not found at: {0}", fullPath));
-                }
-
-            } else {
-                
-                URL url = new URL(path + "cover.jpg");
-                LOG.fine(format("Trying to fetch cover image at URL: {0}", url));
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                con.setAuthenticator(createAuthenticator(media));
-
-                if (con.getResponseCode() == 200) {
-                    return con.getInputStream();
-                } else {
-                    LOG.fine(format("Cover image missing or connection failed with response code {0}",
-                            con.getResponseCode()));
-                }
-            }
+            image = ImageRetrievalService.getInstance().fetchImage(
+                        URI.create(path + "cover.jpg"), createAuthenticator(media));
         }
-        return is;
-    }
-    
-    public static BufferedImage fetchMediaCoverArtSwing(MPMedia media) throws IOException {
-        try(InputStream is = fetchMediaCoverArtInputStream(media)) {
-            BufferedImage image = null;
-            if(is != null) {
-                image = ImageIO.read(is);
-            }
-            return image;
-        }
+        return image;
     }
     
     public static Authenticator createAuthenticator(MPMedia media) {
