@@ -309,13 +309,13 @@ public class SwingMPlayer extends JFrame {
         
         // Play
         controlsPanel.add(playButton = new JButton(FontIcon.of(FontAwesomeSolid.PLAY, BUTTON_ICON_SIZE)), "grow");
-        prevButton.setToolTipText("Play/Pause");
+        playButton.setToolTipText("Play/Pause");
         playButton.addActionListener(e -> onPlayButtonClicked());
         createPlayButtonBlinkTimer();
         
         // Next
         JButton nextButton = new JButton(FontIcon.of(FontAwesomeSolid.FAST_FORWARD, BUTTON_ICON_SIZE));
-        prevButton.setToolTipText("Play Next");
+        nextButton.setToolTipText("Play Next");
         nextButton.addActionListener(e -> playNext());
         controlsPanel.add(nextButton, "grow");
         
@@ -359,6 +359,7 @@ public class SwingMPlayer extends JFrame {
         
         // TODO Change volume button icon as volume changes
         JButton volumeButton = new JButton(FontIcon.of(FontAwesomeSolid.VOLUME_UP, BUTTON_ICON_SIZE));
+        volumeButton.setToolTipText("Playback Volume");
         volumeButton.setComponentPopupMenu(volumePopup);
         
         volumeButton.addMouseListener(new MouseAdapter() {
@@ -370,6 +371,7 @@ public class SwingMPlayer extends JFrame {
         
         // Loop
         loopToggle = new JToggleButton(FontIcon.of(FontAwesomeSolid.REDO, BUTTON_ICON_SIZE));
+        loopToggle.setToolTipText("Loop Playlist On/Off");
         loopToggle.setSelected((boolean) PropertyService.getInstance().getOrCreateProperty(
                 PropertyNamesConst.LOOP_PLAYLIST_PROPERTY_NAME, false).getRight());
         loopToggle.addActionListener(e -> PropertyService.getInstance().setProperty(
@@ -390,7 +392,7 @@ public class SwingMPlayer extends JFrame {
         
         // Settings
         JButton settingsButton = new JButton(FontIcon.of(FontAwesomeSolid.COG, BUTTON_ICON_SIZE));
-        settingsButton.setToolTipText("Various global settings");
+        settingsButton.setToolTipText("Global Settings");
         settingsButton.addActionListener(e -> onSettingsButtonClicked());
         controlsPanel.add(settingsButton, "grow");
     }

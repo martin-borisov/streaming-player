@@ -11,6 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import static java.text.MessageFormat.format;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -19,6 +22,7 @@ public class ImageRetrievalService {
     private static final Logger LOG = 
             Logger.getLogger(ImageRetrievalService.class.getName());
     private static ImageRetrievalService ref;
+    private static Map<URI, BufferedImage> cache;
 
     public static ImageRetrievalService getInstance() {
         synchronized (ImageRetrievalService.class) {
@@ -30,17 +34,27 @@ public class ImageRetrievalService {
     }
     
     private ImageRetrievalService() {
+        cache = new HashMap<>();
     }
     
-    // TODO Implement image caching
     public BufferedImage fetchImage(URI uri, Authenticator auth) {
         LOG.log(Level.FINE, "Trying to fetch cover image at: ''{0}''", uri);
         
         BufferedImage image = null;
-        if(isLocal(uri)) {
-            image = fetchLocalImage(uri);
-        } else if(isHttp(uri)){
-            image = fetchHttpImage(uri, auth);
+        if(cache.containsKey(uri)) {
+            LOG.log(Level.FINE, "Requested image at ''{0}'' retrieved from cache", uri);
+            image = cache.get(uri);
+        } else {
+            if(isLocal(uri)) {
+                image = fetchLocalImage(uri);
+            } else if(isHttp(uri)){
+                image = fetchHttpImage(uri, auth);
+            }
+            
+            if(image != null) {
+                LOG.log(Level.FINE, "Adding requested image at ''{0}'' to cache", uri);
+                cache.put(uri, image);
+            }
         }
         return image;
     }
